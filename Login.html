@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fides</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f7f6f2;
+      --surface: #ffffff;
+      --border: #e0ddd6;
+      --text: #1a1917;
+      --muted: #7a7870;
+      --accent: #1a1917;
+      --accent-hover: #3a3835;
+      --error: #c0392b;
+      --success: #1d6a45;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background-image: url("images/plane.jpg");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 0;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 400px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .wordmark {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2.4rem;
+      color: #ffffff;
+      text-align: center;
+      margin-bottom: 0.25rem;
+      letter-spacing: -0.5px;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+    }
+
+    .tagline {
+      text-align: center;
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.85);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 2.5rem;
+      font-weight: 400;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.75rem;
+    }
+
+    .tab {
+      flex: 1;
+      background: none;
+      border: none;
+      padding: 0.6rem 0;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 400;
+      color: var(--muted);
+      cursor: pointer;
+      position: relative;
+      transition: color 0.2s;
+    }
+
+    .tab.active {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 1.5px;
+      background: var(--text);
+    }
+
+    .form-group {
+      margin-bottom: 1.1rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      color: var(--text);
+      background: var(--bg);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    input:focus {
+      border-color: var(--text);
+      background: #fff;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 0.5rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, opacity 0.15s;
+    }
+
+    .btn:hover { background: var(--accent-hover); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .message {
+      margin-top: 1rem;
+      padding: 0.65rem 0.85rem;
+      border-radius: 7px;
+      font-size: 0.83rem;
+      display: none;
+    }
+
+    .message.error {
+      background: #fdf0ef;
+      color: var(--error);
+      border: 1px solid #f5c6c2;
+      display: block;
+    }
+
+    .message.success {
+      background: #edf7f1;
+      color: var(--success);
+      border: 1px solid #b8e2ca;
+      display: block;
+    }
+
+    .token-box {
+      display: none;
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+    }
+
+    .token-box.visible { display: block; }
+
+    .token-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.4rem;
+    }
+
+    .token-value {
+      font-family: monospace;
+      font-size: 0.72rem;
+      color: var(--text);
+      word-break: break-all;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="wordmark">Fides</div>
+    <div class="tagline">Your travel companion</div>
+
+    <div class="card">
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('login')">Sign in</button>
+        <button class="tab" onclick="switchTab('register')">Create account</button>
+      </div>
+
+      <div id="login-form">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="login-email" placeholder="you@example.com" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" />
+        </div>
+        <button class="btn" onclick="handleLogin()">Sign in</button>
+        <div class="message" id="login-msg"></div>
+      </div>
+
+      <div id="register-form" style="display:none;">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="reg-email" placeholder="you@example.com" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="reg-password" placeholder="••••••••" />
+        </div>
+        <button class="btn" onclick="handleRegister()">Create account</button>
+        <div class="message" id="reg-msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = 'http://localhost:3000/api/auth';
+
+    function switchTab(tab) {
+      const tabs = document.querySelectorAll('.tab');
+      tabs[0].classList.toggle('active', tab === 'login');
+      tabs[1].classList.toggle('active', tab === 'register');
+      document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+      document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
+    }
+
+    function showMsg(id, text, type) {
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.className = 'message ' + type;
+    }
+
+    async function handleLogin() {
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      if (!email || !password) return showMsg('login-msg', 'Please fill in all fields.', 'error');
+
+      try {
+        const res = await fetch(`${API}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (!res.ok) return showMsg('login-msg', data.error || 'Login failed.', 'error');
+
+        sessionStorage.setItem('token', data.token);
+        showMsg('login-msg', 'Signed in successfully.', 'success');
+        setTimeout(() => window.location.href = '/home.html', 1000);
+      } catch (err) {
+        showMsg('login-msg', 'Could not reach the server. Is it running?', 'error');
+      }
+    }
+
+    async function handleRegister() {
+      const email = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-password').value;
+      if (!email || !password) return showMsg('reg-msg', 'Please fill in all fields.', 'error');
+
+      try {
+        const res = await fetch(`${API}/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (!res.ok) return showMsg('reg-msg', data.error || 'Registration failed.', 'error');
+
+        showMsg('reg-msg', 'Account created. You can now sign in.', 'success');
+        setTimeout(() => switchTab('login'), 1500);
+      } catch (err) {
+        showMsg('reg-msg', 'Could not reach the server. Is it running?', 'error');
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fides</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #f7f6f2;
+      --surface: #ffffff;
+      --border: #e0ddd6;
+      --text: #1a1917;
+      --muted: #7a7870;
+      --accent: #1a1917;
+      --accent-light: #f0ede8;
+      --nav-bg: #ffffff;
+      --footer-bg: #f0ede8;
+      --error: #c0392b;
+      --success: #1d6a45;
+      --warning: #92600a;
+      --info-bg: #eef4fb;
+      --info-text: #1a4a7a;
+      --shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+    [data-theme="dark"] {
+      --bg: #18171a;
+      --surface: #242228;
+      --border: #3a3840;
+      --text: #f0ede8;
+      --muted: #8a8790;
+      --accent: #e8e4de;
+      --accent-light: #2e2c32;
+      --nav-bg: #1e1c22;
+      --footer-bg: #1a1820;
+      --error: #e57373;
+      --success: #66bb8a;
+      --warning: #ffb74d;
+      --info-bg: #1a2a3a;
+      --info-text: #90caf9;
+      --shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+
+    nav { background: var(--nav-bg); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow); }
+    .nav-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; padding: 0 1.5rem; }
+    .nav-brand { font-family: 'DM Serif Display', serif; font-size: 1.3rem; color: var(--text); text-decoration: none; margin-right: 2.5rem; white-space: nowrap; padding: 1rem 0; }
+    .nav-tabs { display: flex; flex: 1; }
+    .nav-tab { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 0.75rem 1.1rem; border: none; background: none; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 0.72rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; position: relative; transition: color 0.15s; white-space: nowrap; }
+    .nav-tab svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.5; }
+    .nav-tab:hover { color: var(--text); }
+    .nav-tab.active { color: var(--text); }
+    .nav-tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--text); }
+    .nav-sign-out { margin-left: auto; padding: 0.75rem 1.1rem; border: none; background: none; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 0.72rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; transition: color 0.15s; }
+    .nav-sign-out:hover { color: var(--error); }
+
+    main { flex: 1; max-width: 1100px; margin: 0 auto; width: 100%; padding: 2rem 1.5rem; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .section-title { font-family: 'DM Serif Display', serif; font-size: 1.4rem; color: var(--text); margin-bottom: 0.25rem; }
+    .section-sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 1.75rem; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; }
+    .card-title { font-size: 0.72rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 0.75rem; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    input, select, textarea { width: 100%; padding: 0.6rem 0.85rem; border: 1px solid var(--border); border-radius: 7px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--text); background: var(--bg); outline: none; transition: border-color 0.15s; }
+    input:focus, select:focus, textarea:focus { border-color: var(--text); background: var(--surface); }
+    label { display: block; font-size: 0.75rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.35rem; }
+    .btn { padding: 0.6rem 1.25rem; border-radius: 7px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: background 0.15s; }
+    .btn:hover { background: var(--accent-light); }
+    .btn-primary { background: var(--accent); color: var(--surface); border-color: var(--accent); }
+    .btn-primary:hover { opacity: 0.88; background: var(--accent); }
+    .badge { display: inline-block; font-size: 0.7rem; font-weight: 500; padding: 0.2rem 0.6rem; border-radius: 20px; letter-spacing: 0.04em; }
+    .badge-success { background: #e6f4ec; color: var(--success); }
+    .badge-warning { background: #fef3e2; color: var(--warning); }
+    .badge-error { background: #fdf0ef; color: var(--error); }
+    .divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .form-group { margin-bottom: 1rem; }
+    .info-box { background: var(--info-bg); color: var(--info-text); border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.82rem; margin-bottom: 1.25rem; }
+
+    /* Empty state */
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem 1.5rem; text-align: center; color: var(--muted); gap: 0.6rem; }
+    .empty-state svg { width: 38px; height: 38px; stroke: var(--border); fill: none; stroke-width: 1.2; margin-bottom: 0.25rem; }
+    .empty-state-title { font-size: 0.92rem; font-weight: 500; color: var(--muted); }
+    .empty-state-sub { font-size: 0.78rem; color: var(--border); }
+
+    /* HOME */
+    .destination-hero { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 2rem; margin-bottom: 1.5rem; text-align: center; }
+    .destination-hero h2 { font-family: 'DM Serif Display', serif; font-size: 1.6rem; margin-bottom: 0.5rem; }
+    .destination-hero p { font-size: 0.85rem; color: var(--muted); margin-bottom: 1.5rem; }
+    .destination-inputs { display: flex; gap: 0.75rem; max-width: 560px; margin: 0 auto 1rem; }
+    .destination-inputs input { flex: 1; }
+    .location-opt { font-size: 0.75rem; color: var(--muted); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+    .transport-card { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); margin-bottom: 0.75rem; cursor: pointer; transition: border-color 0.15s; }
+    .transport-card:hover { border-color: var(--text); }
+    .transport-card.cheapest { border-color: var(--success); background: #f0faf5; }
+    [data-theme="dark"] .transport-card.cheapest { background: #0f2018; }
+    .transport-left { display: flex; align-items: center; gap: 0.85rem; }
+    .transport-icon { font-size: 1.4rem; }
+    .transport-name { font-weight: 500; font-size: 0.9rem; }
+    .transport-eta { font-size: 0.78rem; color: var(--muted); }
+    .transport-price { font-size: 1.1rem; font-weight: 500; }
+    .budget-bar-bg { background: var(--border); border-radius: 4px; height: 7px; }
+    .budget-bar-fill { height: 7px; border-radius: 4px; background: var(--accent); }
+    .budget-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); margin-top: 0.3rem; }
+    .hotel-card { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1.1rem; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); margin-bottom: 0.75rem; }
+    .hotel-name { font-weight: 500; font-size: 0.9rem; }
+    .hotel-meta { font-size: 0.77rem; color: var(--muted); margin-top: 2px; }
+    .hotel-price { font-weight: 500; font-size: 0.95rem; text-align: right; }
+    .hotel-night { font-size: 0.72rem; color: var(--muted); }
+    .stars { color: #c8a84b; font-size: 0.8rem; }
+
+    /* TRAVEL */
+    .ticket-card { display: flex; align-items: center; gap: 1.25rem; padding: 1.1rem 1.25rem; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); margin-bottom: 0.85rem; }
+    .ticket-icon { font-size: 1.6rem; flex-shrink: 0; }
+    .ticket-route { font-weight: 500; font-size: 0.92rem; }
+    .ticket-meta { font-size: 0.77rem; color: var(--muted); margin-top: 2px; }
+    .ticket-right { margin-left: auto; text-align: right; }
+    .price-alert { display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1.1rem; border: 1px solid #d4edda; border-radius: 10px; background: #f0faf5; margin-bottom: 0.75rem; font-size: 0.85rem; }
+    [data-theme="dark"] .price-alert { border-color: #1a4a2a; background: #0f2018; }
+    .price-alert-save { color: var(--success); font-weight: 500; }
+
+    /* AI */
+    .chat-wrap { display: flex; flex-direction: column; height: 480px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .chat-messages { flex: 1; overflow-y: auto; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.85rem; }
+    .chat-msg { max-width: 72%; padding: 0.65rem 0.95rem; border-radius: 10px; font-size: 0.87rem; line-height: 1.55; }
+    .chat-msg.user { background: var(--accent); color: var(--surface); align-self: flex-end; border-bottom-right-radius: 3px; }
+    .chat-msg.agent { background: var(--accent-light); color: var(--text); align-self: flex-start; border-bottom-left-radius: 3px; }
+    .chat-input-row { display: flex; gap: 0.5rem; padding: 0.85rem 1rem; border-top: 1px solid var(--border); }
+    .chat-input-row input { flex: 1; }
+    .api-key-notice { background: var(--accent-light); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; font-size: 0.82rem; color: var(--muted); margin-bottom: 1.25rem; }
+
+    /* APPROVAL */
+    .approval-row { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1.1rem; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); margin-bottom: 0.75rem; }
+    .approval-title { font-weight: 500; font-size: 0.9rem; }
+    .approval-meta { font-size: 0.77rem; color: var(--muted); margin-top: 2px; }
+    .approval-right { display: flex; align-items: center; gap: 0.75rem; }
+
+    /* ACCOUNT */
+    .avatar { width: 54px; height: 54px; border-radius: 50%; background: var(--accent-light); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-family: 'DM Serif Display', serif; font-size: 1.3rem; color: var(--text); flex-shrink: 0; }
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--border); }
+    .toggle-row:last-child { border-bottom: none; }
+    .toggle-label { font-size: 0.88rem; }
+    .toggle-sub { font-size: 0.75rem; color: var(--muted); margin-top: 1px; }
+    .toggle { position: relative; width: 38px; height: 22px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; inset: 0; background: var(--border); border-radius: 22px; cursor: pointer; transition: background 0.2s; }
+    .toggle-slider::before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: transform 0.2s; }
+    .toggle input:checked + .toggle-slider { background: var(--accent); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(16px); }
+
+    /* Loading */
+    .loading-bar { height: 2px; background: var(--border); border-radius: 2px; overflow: hidden; margin-bottom: 1.5rem; display: none; }
+    .loading-bar.active { display: block; }
+    .loading-bar::after { content: ''; display: block; height: 100%; width: 40%; background: var(--accent); animation: loading-slide 1.2s ease-in-out infinite; }
+    @keyframes loading-slide { 0% { margin-left: -40%; } 100% { margin-left: 100%; } }
+
+    /* FOOTER */
+    footer { background: var(--footer-bg); border-top: 1px solid var(--border); margin-top: auto; }
+    .footer-inner { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 2rem; }
+    .footer-title { font-size: 0.72rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.09em; color: var(--muted); margin-bottom: 0.75rem; }
+    .footer-body { font-size: 0.8rem; color: var(--muted); line-height: 1.7; }
+    .footer-link { color: var(--muted); font-size: 0.8rem; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; display: block; margin-bottom: 0.35rem; background: none; border: none; font-family: 'DM Sans', sans-serif; }
+    .footer-bottom { border-top: 1px solid var(--border); text-align: center; padding: 0.85rem 1.5rem; font-size: 0.72rem; color: var(--muted); }
+    .feedback-row { display: flex; gap: 0.5rem; margin-top: 0.6rem; }
+    .feedback-row input { flex: 1; font-size: 0.8rem; padding: 0.45rem 0.7rem; }
+    .feedback-row .btn { padding: 0.45rem 0.85rem; font-size: 0.78rem; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-brand" href="#">Fides</a>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showTab('home', this)">
+        <svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+        Home
+      </button>
+      <button class="nav-tab" onclick="showTab('travel', this)">
+        <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+        Travel
+      </button>
+      <button class="nav-tab" onclick="showTab('ai', this)">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9h.01M15 9h.01M9 15s1 1.5 3 1.5 3-1.5 3-1.5"/></svg>
+        AI Agent
+      </button>
+      <button class="nav-tab" onclick="showTab('approval', this)">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M5 8a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V8z"/></svg>
+        Approval
+      </button>
+      <button class="nav-tab" onclick="showTab('account', this)">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Account
+      </button>
+    </div>
+    <button class="nav-sign-out" onclick="signOut()">Sign out</button>
+  </div>
+</nav>
+
+<main>
+  <div class="loading-bar" id="loading-bar"></div>
+
+  <!-- HOME -->
+  <div class="tab-content active" id="tab-home">
+    <div class="destination-hero">
+      <h2 id="home-greeting">Welcome back</h2>
+      <p>Enter your origin and destination to get started, or share your location.</p>
+      <div class="destination-inputs">
+        <input type="text" id="origin" placeholder="From — city or airport"/>
+        <input type="text" id="dest" placeholder="To — city or airport"/>
+        <button class="btn btn-primary" onclick="planTrip()">Plan</button>
+      </div>
+      <span class="location-opt" onclick="useLocation()">Use my current location instead</span>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="card-title">Transport options</div>
+        <div id="transport-list">
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+            <div class="empty-state-title">No trip planned yet</div>
+            <div class="empty-state-sub">Enter a destination above to see transport options</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card-title">Travel budget</div>
+        <div id="budget-section">
+          <div class="empty-state" style="border:1px solid var(--border);border-radius:12px;margin-bottom:1rem;">
+            <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            <div class="empty-state-title">No active budget</div>
+            <div class="empty-state-sub">Start planning a trip to track spending</div>
+          </div>
+        </div>
+        <div class="card-title">Nearby hotels</div>
+        <div id="hotel-list">
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <div class="empty-state-title">No hotels to show</div>
+            <div class="empty-state-sub">Share your location or plan a trip first</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRAVEL -->
+  <div class="tab-content" id="tab-travel">
+    <div class="section-title">My Travel</div>
+    <div class="section-sub">Booked trips, tickets, and live price comparisons.</div>
+    <div class="card-title">Upcoming bookings</div>
+    <div id="bookings-list">
+      <div class="empty-state" style="border:1px solid var(--border);border-radius:12px;margin-bottom:1.25rem;">
+        <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        <div class="empty-state-title">No upcoming bookings</div>
+        <div class="empty-state-sub">Your confirmed trips will appear here</div>
+      </div>
+    </div>
+    <hr class="divider"/>
+    <div class="card-title">Live price alerts</div>
+    <div id="price-alerts-list">
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <div class="empty-state-title">No active price alerts</div>
+        <div class="empty-state-sub">Alerts will appear when a cheaper option is found</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI AGENT -->
+  <div class="tab-content" id="tab-ai">
+    <div class="section-title">AI Travel Agent</div>
+    <div class="section-sub">Ask for help de-escalating a situation, local recommendations, or travel suggestions.</div>
+    <div class="api-key-notice" id="api-key-notice">🔑 API key not configured. Add your key in the <span style="text-decoration:underline;cursor:pointer;" onclick="showTab('account', document.querySelectorAll('.nav-tab')[4])">Account</span> tab to enable the AI agent.</div>
+    <div class="chat-wrap">
+      <div class="chat-messages" id="chat-messages">
+        <div class="chat-msg agent">Hi, I'm your Fides travel agent. I can help with local food recommendations, travel suggestions, or navigating tricky situations on the road. What do you need?</div>
+      </div>
+      <div class="chat-input-row">
+        <input type="text" id="chat-input" placeholder="Ask me anything about your trip…" onkeydown="if(event.key==='Enter') sendChat()"/>
+        <button class="btn btn-primary" onclick="sendChat()">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPROVAL -->
+  <div class="tab-content" id="tab-approval">
+    <div class="section-title">Approvals & Reimbursements</div>
+    <div class="section-sub">Submit trips for manager approval and track reimbursement status.</div>
+    <div class="grid-2">
+      <div>
+        <div class="card-title" style="margin-bottom:0.75rem;">Submit for approval</div>
+        <div class="card" style="margin-bottom:0;">
+          <div class="form-row">
+            <div class="form-group" style="margin:0;"><label>Trip name</label><input type="text" id="approval-trip-name" placeholder="e.g. Q2 Client Visit Chicago"/></div>
+            <div class="form-group" style="margin:0;"><label>Manager email</label><input type="email" id="approval-manager" placeholder="manager@company.com"/></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="margin:0;"><label>Travel dates</label><input type="text" id="approval-dates" placeholder="e.g. May 10 – May 13"/></div>
+            <div class="form-group" style="margin:0;"><label>Total estimated cost</label><input type="text" id="approval-cost" placeholder="$0.00"/></div>
+          </div>
+          <div class="form-group">
+            <label>Items to approve</label>
+            <div style="display:flex;flex-direction:column;gap:0.4rem;margin-top:0.35rem;">
+              <label style="text-transform:none;letter-spacing:0;font-size:0.82rem;display:flex;gap:0.5rem;align-items:center;cursor:pointer;"><input type="checkbox" id="check-flights" style="width:auto;"/> Flights</label>
+              <label style="text-transform:none;letter-spacing:0;font-size:0.82rem;display:flex;gap:0.5rem;align-items:center;cursor:pointer;"><input type="checkbox" id="check-hotel" style="width:auto;"/> Hotel</label>
+              <label style="text-transform:none;letter-spacing:0;font-size:0.82rem;display:flex;gap:0.5rem;align-items:center;cursor:pointer;"><input type="checkbox" id="check-ground" style="width:auto;"/> Ground transport</label>
+              <label style="text-transform:none;letter-spacing:0;font-size:0.82rem;display:flex;gap:0.5rem;align-items:center;cursor:pointer;"><input type="checkbox" id="check-meals" style="width:auto;"/> Meals & incidentals</label>
+            </div>
+          </div>
+          <div class="form-group"><label>Notes for manager</label><textarea rows="3" id="approval-notes" placeholder="Add context, purpose of trip, or any special requests…"></textarea></div>
+          <button class="btn btn-primary" style="width:100%;" onclick="submitApproval()">Send for approval</button>
+        </div>
+      </div>
+      <div>
+        <div class="card-title" style="margin-bottom:0.75rem;">Pending approvals</div>
+        <div id="approvals-list">
+          <div class="empty-state" style="border:1px solid var(--border);border-radius:12px;margin-bottom:1.25rem;">
+            <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M5 8a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V8z"/></svg>
+            <div class="empty-state-title">No pending approvals</div>
+            <div class="empty-state-sub">Submitted trips will appear here</div>
+          </div>
+        </div>
+        <div class="card-title" style="margin:1.5rem 0 0.75rem;">Reimbursements & invoices</div>
+        <div id="reimbursements-list">
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            <div class="empty-state-title">No reimbursements yet</div>
+            <div class="empty-state-sub">Submitted invoices will appear here</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACCOUNT -->
+  <div class="tab-content" id="tab-account">
+    <div class="section-title">Account</div>
+    <div class="section-sub">Manage your profile, preferences, and data.</div>
+    <div class="grid-2">
+      <div>
+        <div class="card-title" style="margin-bottom:0.75rem;">Profile</div>
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;">
+            <div class="avatar" id="avatar-initials">?</div>
+            <div><div style="font-weight:500;" id="profile-name">—</div><div style="font-size:0.78rem;color:var(--muted);" id="profile-email">—</div></div>
+          </div>
+          <div class="form-group"><label>Display name</label><input type="text" id="display-name" placeholder="Your name"/></div>
+          <div class="form-group"><label>AI Agent API key</label><input type="password" id="api-key-input" placeholder="sk-…"/></div>
+          <div id="save-feedback" style="font-size:0.78rem;color:var(--success);margin-bottom:0.5rem;display:none;">✓ Saved</div>
+          <button class="btn btn-primary" onclick="saveProfile()">Save changes</button>
+        </div>
+        <div class="card-title" style="margin-bottom:0.75rem;">Danger zone</div>
+        <div class="card" style="border-color:#f5c6c2;">
+          <div style="font-size:0.85rem;color:var(--muted);margin-bottom:1rem;">Deleting your account is permanent and cannot be undone. All your trips, bookings, and data will be removed.</div>
+          <button class="btn" style="color:var(--error);border-color:#f5c6c2;" onclick="confirmDelete()">Delete my account</button>
+        </div>
+      </div>
+      <div>
+        <div class="card-title" style="margin-bottom:0.75rem;">Preferences</div>
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div class="toggle-row">
+            <div><div class="toggle-label">Dark mode</div><div class="toggle-sub">Switch between light and dark theme</div></div>
+            <label class="toggle"><input type="checkbox" id="dark-toggle" onchange="toggleDark(this)"/><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Share location</div><div class="toggle-sub">Used to find nearby transport and hotels</div></div>
+            <label class="toggle"><input type="checkbox" id="pref-location" onchange="savePref()"/><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Price alerts</div><div class="toggle-sub">Notify when a cheaper option is available</div></div>
+            <label class="toggle"><input type="checkbox" id="pref-alerts" onchange="savePref()"/><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Approval reminders</div><div class="toggle-sub">Email reminders for pending approvals</div></div>
+            <label class="toggle"><input type="checkbox" id="pref-reminders" onchange="savePref()"/><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+        <div class="card-title" style="margin-bottom:0.75rem;">Preferred services</div>
+        <div class="card">
+          <div class="form-group"><label>Preferred ride service</label>
+            <select id="pref-ride" onchange="savePref()">
+              <option>No preference</option><option>Uber</option><option>Lyft</option><option>Yellow Cab</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Preferred hotel chain</label>
+            <select id="pref-hotel" onchange="savePref()">
+              <option>No preference</option><option>Marriott</option><option>Hilton</option><option>Hyatt</option><option>IHG</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Preferred airline</label>
+            <select id="pref-airline" onchange="savePref()">
+              <option>No preference</option><option>United</option><option>Delta</option><option>American</option><option>Southwest</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-title">Corporate travel guidelines</div>
+      <div class="footer-body">All travel must be booked in accordance with company policy. Economy class is required for flights under 6 hours. Hotel stays must not exceed the per diem rate for the destination city. All expenses over $50 require a receipt. Reimbursements are processed within 10–15 business days of submission. Personal travel combined with business travel must be declared and approved in advance.</div>
+    </div>
+    <div>
+      <div class="footer-title">Data & privacy</div>
+      <div class="footer-body">Your location and travel data are used only to power Fides features and are never sold to third parties. You can delete your data at any time from the Account tab. We use industry-standard encryption for all sensitive information.</div>
+      <br/>
+      <button class="footer-link">Full privacy policy</button>
+      <button class="footer-link">Terms of service</button>
+    </div>
+    <div>
+      <div class="footer-title">Feedback & bugs</div>
+      <div class="footer-body">Found something broken or have a suggestion?</div>
+      <div class="feedback-row">
+        <input type="text" id="feedback-input" placeholder="Leave a note…"/>
+        <button class="btn" onclick="submitFeedback()">Send</button>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2026 Fides · Corporate Travel Companion</div>
+</footer>
+
+<script>
+  const API = 'http://localhost:3000/api/auth';
+
+  // ── Auth guard ──────────────────────────────────────────────────────────────
+  const token = sessionStorage.getItem('token');
+  if (!token) {
+    window.location.href = '/Login.html';
+  }
+
+  function authHeaders() {
+    return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+  }
+
+  // ── Load user on page load ──────────────────────────────────────────────────
+  async function loadUser() {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API}/me`, { headers: authHeaders() });
+      if (res.status === 401) { signOut(); return; }
+      const { user } = await res.json();
+      applyUser(user);
+    } catch (err) {
+      console.error('Could not load user profile:', err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function applyUser(user) {
+    // Profile header
+    const name = user.displayName || user.email.split('@')[0];
+    document.getElementById('profile-name').textContent = user.displayName || '—';
+    document.getElementById('profile-email').textContent = user.email;
+    document.getElementById('display-name').value = user.displayName || '';
+    const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    document.getElementById('avatar-initials').textContent = initials || '?';
+
+    // Greeting
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+    document.getElementById('home-greeting').textContent = `${greeting}, ${name.split(' ')[0]}`;
+
+    // Preferences
+    const p = user.preferences || {};
+    const darkOn = p.darkMode || false;
+    document.getElementById('dark-toggle').checked = darkOn;
+    document.documentElement.setAttribute('data-theme', darkOn ? 'dark' : 'light');
+
+    const loc = document.getElementById('pref-location');
+    if (loc) loc.checked = p.shareLocation !== false;
+
+    const alerts = document.getElementById('pref-alerts');
+    if (alerts) alerts.checked = p.priceAlerts !== false;
+
+    const reminders = document.getElementById('pref-reminders');
+    if (reminders) reminders.checked = p.approvalReminders !== false;
+
+    setSelectValue('pref-ride', p.preferredRide);
+    setSelectValue('pref-hotel', p.preferredHotel);
+    setSelectValue('pref-airline', p.preferredAirline);
+
+    // API key notice
+    const apiKey = sessionStorage.getItem('api_key');
+    if (apiKey) document.getElementById('api-key-notice').style.display = 'none';
+  }
+
+  function setSelectValue(id, value) {
+    const el = document.getElementById(id);
+    if (!el || !value) return;
+    for (const opt of el.options) {
+      if (opt.value === value || opt.text === value) { el.value = opt.value; break; }
+    }
+  }
+
+  // ── Save profile ────────────────────────────────────────────────────────────
+  async function saveProfile() {
+    const displayName = document.getElementById('display-name').value.trim();
+    const apiKey = document.getElementById('api-key-input').value.trim();
+
+    // Update API key locally
+    if (apiKey) {
+      sessionStorage.setItem('api_key', apiKey);
+      document.getElementById('api-key-notice').style.display = 'none';
+    }
+
+    try {
+      const res = await fetch(`${API}/me`, {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify({ displayName })
+      });
+      if (!res.ok) throw new Error('Save failed');
+      const { user } = await res.json();
+      applyUser(user);
+      const fb = document.getElementById('save-feedback');
+      fb.style.display = 'block';
+      setTimeout(() => fb.style.display = 'none', 2500);
+    } catch (err) {
+      alert('Could not save profile. Please try again.');
+    }
+  }
+
+  // ── Save preferences (auto on toggle/select change) ─────────────────────────
+  let prefSaveTimer;
+  async function savePref() {
+    clearTimeout(prefSaveTimer);
+    prefSaveTimer = setTimeout(async () => {
+      const preferences = {
+        darkMode: document.getElementById('dark-toggle').checked,
+        shareLocation: document.getElementById('pref-location').checked,
+        priceAlerts: document.getElementById('pref-alerts').checked,
+        approvalReminders: document.getElementById('pref-reminders').checked,
+        preferredRide: document.getElementById('pref-ride').value,
+        preferredHotel: document.getElementById('pref-hotel').value,
+        preferredAirline: document.getElementById('pref-airline').value,
+      };
+      try {
+        await fetch(`${API}/me`, {
+          method: 'PATCH',
+          headers: authHeaders(),
+          body: JSON.stringify({ preferences })
+        });
+      } catch (err) { /* silent fail */ }
+    }, 600);
+  }
+
+  // ── UI helpers ──────────────────────────────────────────────────────────────
+  function showTab(name, btn) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    if (btn) btn.classList.add('active');
+  }
+
+  function setLoading(on) {
+    document.getElementById('loading-bar').classList.toggle('active', on);
+  }
+
+  function toggleDark(el) {
+    document.documentElement.setAttribute('data-theme', el.checked ? 'dark' : 'light');
+    savePref();
+  }
+
+  function useLocation() {
+    if (!navigator.geolocation) return alert('Geolocation not supported.');
+    navigator.geolocation.getCurrentPosition(
+      pos => { document.getElementById('origin').value = `${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`; },
+      () => alert('Location access denied.')
+    );
+  }
+
+  function planTrip() {
+    const from = document.getElementById('origin').value.trim();
+    const to = document.getElementById('dest').value.trim();
+    if (!from || !to) return alert('Please enter both an origin and destination.');
+    alert(`Planning trip from "${from}" to "${to}" — live data coming soon.`);
+  }
+
+  function sendChat() {
+    const input = document.getElementById('chat-input');
+    const msg = input.value.trim();
+    if (!msg) return;
+    const messages = document.getElementById('chat-messages');
+    messages.innerHTML += `<div class="chat-msg user">${msg}</div>`;
+    input.value = '';
+    messages.scrollTop = messages.scrollHeight;
+    setTimeout(() => {
+      messages.innerHTML += `<div class="chat-msg agent">Add your API key in the Account tab to enable AI responses.</div>`;
+      messages.scrollTop = messages.scrollHeight;
+    }, 500);
+  }
+
+  function submitApproval() {
+    const name = document.getElementById('approval-trip-name').value.trim();
+    if (!name) return alert('Please enter a trip name.');
+    alert(`Approval request for "${name}" submitted — feature coming soon.`);
+  }
+
+  function signOut() {
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('api_key');
+    window.location.href = '/Login.html';
+  }
+
+  function confirmDelete() {
+    if (confirm('Are you sure? This cannot be undone.')) {
+      sessionStorage.clear();
+      window.location.href = '/Login.html';
+    }
+  }
+
+  function submitFeedback() {
+    const val = document.getElementById('feedback-input').value.trim();
+    if (!val) return;
+    document.getElementById('feedback-input').value = '';
+    alert('Thanks for your feedback!');
+  }
+
+
+  window.addEventListener('beforeunload', () => {
+    if(performance.name.type !== reload){
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('api_key');
+    }
+});
+  loadUser();
+</script>
+</body>
+</html>
