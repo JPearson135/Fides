@@ -28,6 +28,19 @@ const travelRequestSchema = new mongoose.Schema({
     enum: ['pending', 'approved', 'denied'],
     default: 'pending'
   },
+  reimbursed: {
+    type: Boolean,
+    default: false
+  },
+  reimbursedDate: {
+    type: Date,
+    default: null
+  },
+  reimbursedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
+  },
   submittedAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 
