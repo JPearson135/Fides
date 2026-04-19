@@ -39,8 +39,8 @@
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; }
     .card-title { font-size: 0.72rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 0.75rem; }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
-    input, select, textarea { width: 100%; padding: 0.6rem 0.85rem; border: 1px solid var(--border); border-radius: 7px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--text); background: var(--bg); outline: none; transition: border-color 0.15s; }
-    input:focus, select:focus, textarea:focus { border-color: var(--text); background: var(--surface); }
+    input:not([type=checkbox]):not([type=radio]), select, textarea { width: 100%; padding: 0.6rem 0.85rem; border: 1px solid var(--border); border-radius: 7px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--text); background: var(--bg); outline: none; transition: border-color 0.15s; }
+    input:not([type=checkbox]):not([type=radio]):focus, select:focus, textarea:focus { border-color: var(--text); background: var(--surface); }
     label { display: block; font-size: 0.75rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.35rem; }
     .btn { padding: 0.6rem 1.25rem; border-radius: 7px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: background 0.15s; }
     .btn:hover { background: var(--accent-light); }
@@ -180,6 +180,50 @@
     .feedback-row input { flex: 1; font-size: 0.8rem; padding: 0.45rem 0.7rem; }
     .feedback-row .btn { padding: 0.45rem 0.85rem; font-size: 0.78rem; }
     .pac-container { z-index: 9999; font-family: 'DM Sans', sans-serif; }
+    /* ── Cart ── */
+    .cart-btn { position: relative; padding: 0.75rem 0.9rem; border: none; background: none; color: var(--muted); cursor: pointer; transition: color 0.15s; display: flex; align-items: center; }
+    .cart-btn.empty { color: var(--border); }
+    .cart-btn:hover { color: var(--text); }
+    .cart-btn.has-items { color: var(--text); }
+    @keyframes cart-pop { 0%{transform:scale(1)} 40%{transform:scale(1.3)} 100%{transform:scale(1)} }
+    .cart-badge.pop { animation: cart-pop 0.3s ease; }
+    .cart-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.5; }
+    .cart-badge { position: absolute; top: 8px; right: 6px; background: var(--accent); color: var(--surface); font-size: 0.6rem; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; line-height: 1; transition: opacity 0.15s; }
+    .cart-badge.empty { opacity: 0; }
+    .cart-dropdown { position: fixed; top: 60px; right: 1rem; width: 320px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.14); z-index: 200; display: none; flex-direction: column; overflow: hidden; }
+    .cart-dropdown.open { display: flex; }
+    .cart-header { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1.1rem 0.6rem; border-bottom: 1px solid var(--border); }
+    .cart-header-title { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+    .cart-close { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 1.1rem; line-height: 1; padding: 0.1rem; }
+    .cart-close:hover { color: var(--text); }
+    .cart-items { padding: 0.5rem 0; }
+    .cart-item { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.55rem 1.1rem; transition: background 0.1s; }
+    .cart-item:hover { background: var(--accent-light); }
+    .cart-item-left { display: flex; align-items: center; gap: 0.55rem; min-width: 0; }
+    .cart-item-icon { font-size: 1rem; flex-shrink: 0; }
+    .cart-item-name { font-size: 0.83rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cart-item-price { font-size: 0.78rem; color: var(--muted); }
+    .cart-item-remove { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 1rem; padding: 0.1rem 0.25rem; border-radius: 4px; transition: color 0.1s, background 0.1s; flex-shrink: 0; }
+    .cart-item-remove:hover { color: var(--error); background: #fdf0ef; }
+    .cart-empty { padding: 1.5rem 1.1rem; font-size: 0.82rem; color: var(--muted); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 0.1rem; }
+    .cart-footer { border-top: 1px solid var(--border); padding: 0.75rem 1.1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .cart-total { display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--muted); }
+    .cart-total strong { color: var(--text); font-weight: 600; }
+    .cart-backdrop { position: fixed; inset: 0; z-index: 199; display: none; }
+    .cart-backdrop.open { display: block; }
+    /* ── Manager request cards ── */
+    .mgr-request { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.25rem; margin-bottom: 1rem; }
+    .mgr-request-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem; }
+    .mgr-request-name { font-weight: 600; font-size: 0.95rem; }
+    .mgr-request-from { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+    .mgr-request-items { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 0.85rem; }
+    .mgr-request-item { display: flex; justify-content: space-between; padding: 0.45rem 0.85rem; border-bottom: 1px solid var(--border); font-size: 0.82rem; }
+    .mgr-request-item:last-child { border-bottom: none; }
+    .mgr-request-actions { display: flex; gap: 0.6rem; }
+    .btn-approve { flex: 1; padding: 0.5rem; border-radius: 7px; border: 1px solid var(--success); background: transparent; color: var(--success); font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: background 0.15s, color 0.15s; }
+    .btn-approve:hover { background: var(--success); color: #fff; }
+    .btn-deny { flex: 1; padding: 0.5rem; border-radius: 7px; border: 1px solid var(--error); background: transparent; color: var(--error); font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: background 0.15s, color 0.15s; }
+    .btn-deny:hover { background: var(--error); color: #fff; }
   </style>
 </head>
 <body>
@@ -203,9 +247,28 @@
         <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Account
       </button>
     </div>
+    <button class="cart-btn" id="cart-btn" onclick="toggleCart()" title="View selected items">
+      <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+      <span class="cart-badge" id="cart-badge">0</span>
+    </button>
     <button class="nav-sign-out" onclick="signOut()">Sign out</button>
   </div>
 </nav>
+
+<!-- Cart dropdown -->
+<div class="cart-backdrop" id="cart-backdrop" onclick="toggleCart()"></div>
+<div class="cart-dropdown" id="cart-dropdown">
+  <div class="cart-header">
+    <span class="cart-header-title">Selected items</span>
+    <button class="cart-close" onclick="toggleCart()">×</button>
+  </div>
+  <div class="cart-items" id="cart-items-list"></div>
+  <div class="cart-footer" id="cart-footer" style="display:none;">
+    <div class="cart-total"><span>Estimated total</span><strong id="cart-total-amount">$0</strong></div>
+    <button class="btn btn-primary" style="width:100%;font-size:0.83rem;padding:0.55rem;" onclick="toggleCart();exportToApproval()">→ Send to Approval</button>
+    <button class="btn btn-sm" style="width:100%;font-size:0.78rem;" onclick="clearSelections();toggleCart()">Clear all</button>
+  </div>
+</div>
 
 <main>
   <div class="loading-bar" id="loading-bar"></div>
@@ -290,52 +353,71 @@
 
   <!-- APPROVAL -->
   <div class="tab-content" id="tab-approval">
-    <div class="section-title">Approvals & Reimbursements</div>
-    <div class="section-sub">Submit trips for manager approval and track reimbursement status.</div>
-    <div class="grid-2">
-      <div>
-        <div class="card-title" style="margin-bottom:0.75rem;">Submit for approval</div>
-        <div class="card" style="margin-bottom:0;">
-          <div id="approval-reservations-wrap">
-            <div style="font-size:0.72rem;font-weight:500;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:0.5rem;">Selected reservations</div>
-            <div id="approval-reservations-list">
-              <div id="approval-no-selection" style="padding:0.75rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:0.82rem;color:var(--muted);margin-bottom:1rem;">
-                No items selected yet — add flights, hotels, or ground transport from the Search tab.
+
+    <!-- EMPLOYEE VIEW -->
+    <div id="approval-employee-view">
+      <div class="section-title">Approvals & Reimbursements</div>
+      <div class="section-sub">Submit your trip for manager approval and track status.</div>
+      <div class="grid-2">
+        <div>
+          <div class="card-title" style="margin-bottom:0.75rem;">Submit for approval</div>
+          <div class="card" style="margin-bottom:0;">
+            <div id="approval-reservations-wrap">
+              <div style="font-size:0.72rem;font-weight:500;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:0.5rem;">Selected reservations</div>
+              <div id="approval-reservations-list">
+                <div id="approval-no-selection" style="padding:0.75rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:0.82rem;color:var(--muted);margin-bottom:1rem;">
+                  No items selected yet — add flights, hotels, or ground transport from the Search tab.
+                </div>
               </div>
             </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group" style="margin:0;"><label>Trip name</label><input type="text" id="approval-trip-name" placeholder="e.g. Q2 Client Visit"/></div>
-            <div class="form-group" style="margin:0;">
-              <label>Manager</label>
-              <div id="approval-manager-display" style="padding:0.6rem 0.85rem;border:1px solid var(--border);border-radius:7px;font-size:0.88rem;color:var(--muted);background:var(--bg);">Loading…</div>
+            <div class="form-row">
+              <div class="form-group" style="margin:0;"><label>Trip name</label><input type="text" id="approval-trip-name" placeholder="e.g. Q2 Client Visit"/></div>
+              <div class="form-group" style="margin:0;">
+                <label>Manager</label>
+                <div id="approval-manager-display" style="padding:0.6rem 0.85rem;border:1px solid var(--border);border-radius:7px;font-size:0.88rem;color:var(--muted);background:var(--bg);">Loading…</div>
+              </div>
             </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group" style="margin:0;"><label>Travel dates</label><input type="text" id="approval-dates" placeholder="May 10 – May 13"/></div>
-            <div class="form-group" style="margin:0;"><label>Total estimated cost</label><input type="text" id="approval-cost" placeholder="$0.00"/></div>
-          </div>
-          <div class="form-group">
-            <label>Items to approve</label>
-            <div style="display:flex;flex-direction:column;gap:0.4rem;margin-top:0.35rem;">
-              <label style="text-transform:none;letter-spacing:0;font-size:0.82rem;display:flex;gap:0.5rem;align-items:center;cursor:pointer;"><input type="checkbox" id="chk-flights" style="width:auto;"/> Flights</label>
-              <label style="text-transform:none;letter-spacing:0;font-size:0.82rem;display:flex;gap:0.5rem;align-items:center;cursor:pointer;"><input type="checkbox" id="chk-hotel" style="width:auto;"/> Hotel</label>
-              <label style="text-transform:none;letter-spacing:0;font-size:0.82rem;display:flex;gap:0.5rem;align-items:center;cursor:pointer;"><input type="checkbox" id="chk-ground" style="width:auto;"/> Ground transport</label>
-              <label style="text-transform:none;letter-spacing:0;font-size:0.82rem;display:flex;gap:0.5rem;align-items:center;cursor:pointer;"><input type="checkbox" id="chk-meals" style="width:auto;"/> Meals & incidentals</label>
+            <div class="form-row">
+              <div class="form-group" style="margin:0;"><label>Travel dates</label><input type="text" id="approval-dates" placeholder="May 10 – May 13"/></div>
+              <div class="form-group" style="margin:0;"><label>Total estimated cost</label><input type="text" id="approval-cost" placeholder="$0.00"/></div>
             </div>
+            <div class="form-group">
+              <label>Items to approve</label>
+              <div style="display:flex;flex-direction:column;gap:0.4rem;margin-top:0.35rem;">
+                <label style="text-transform:none;letter-spacing:0;font-size:0.82rem;display:flex;gap:0.5rem;align-items:center;cursor:pointer;"><input type="checkbox" id="chk-flights" style="width:auto;"/> Flights</label>
+                <label style="text-transform:none;letter-spacing:0;font-size:0.82rem;display:flex;gap:0.5rem;align-items:center;cursor:pointer;"><input type="checkbox" id="chk-hotel" style="width:auto;"/> Hotel</label>
+                <label style="text-transform:none;letter-spacing:0;font-size:0.82rem;display:flex;gap:0.5rem;align-items:center;cursor:pointer;"><input type="checkbox" id="chk-ground" style="width:auto;"/> Ground transport</label>
+                <label style="text-transform:none;letter-spacing:0;font-size:0.82rem;display:flex;gap:0.5rem;align-items:center;cursor:pointer;"><input type="checkbox" id="chk-meals" style="width:auto;"/> Meals & incidentals</label>
+              </div>
+            </div>
+            <div class="form-group"><label>Notes for manager</label><textarea rows="3" id="approval-notes" placeholder="Purpose of trip, special requests…"></textarea></div>
+            <button class="btn btn-primary" style="width:100%;" onclick="submitApproval()">Send for approval</button>
+            <div id="approval-msg" style="margin-top:0.75rem;font-size:0.82rem;color:var(--success);display:none;"></div>
           </div>
-          <div class="form-group"><label>Notes for manager</label><textarea rows="3" id="approval-notes" placeholder="Purpose of trip, special requests…"></textarea></div>
-          <button class="btn btn-primary" style="width:100%;" onclick="submitApproval()">Send for approval</button>
-          <div id="approval-msg" style="margin-top:0.75rem;font-size:0.82rem;color:var(--success);display:none;"></div>
         </div>
-      </div>
-      <div>
-        <div class="card-title" style="margin-bottom:0.75rem;">Pending approvals</div>
-        <div id="approvals-list">
-          <div class="empty-state" style="border:1px solid var(--border);border-radius:12px;margin-bottom:1.25rem;"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M5 8a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V8z"/></svg><div class="empty-state-title">No pending approvals</div><div class="empty-state-sub">Submitted requests will appear here</div></div>
+        <div>
+          <div class="card-title" style="margin-bottom:0.75rem;">My submitted requests</div>
+          <div id="approvals-list">
+            <div class="empty-state" style="border:1px solid var(--border);border-radius:12px;margin-bottom:1.25rem;"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M5 8a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V8z"/></svg><div class="empty-state-title">No submitted requests</div><div class="empty-state-sub">Submitted trips will appear here</div></div>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- MANAGER VIEW -->
+    <div id="approval-manager-view" style="display:none;">
+      <div class="section-title">Team Travel Requests</div>
+      <div class="section-sub">Review and approve or deny your team's travel submissions.</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <div style="display:flex;gap:0.5rem;">
+          <span class="badge badge-warning" id="mgr-pending-count">0 pending</span>
+        </div>
+      </div>
+      <div id="manager-requests-list">
+        <div class="empty-state" style="border:1px solid var(--border);border-radius:12px;padding:2.5rem;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" width="36" height="36"><path d="M9 12l2 2 4-4"/><path d="M5 8a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V8z"/></svg><div class="empty-state-title">No pending requests</div><div class="empty-state-sub">Your team's approval requests will appear here</div></div>
+      </div>
+    </div>
+
   </div>
 
   <!-- ACCOUNT -->
@@ -411,6 +493,17 @@
   let mapInstance = null, directionsRenderer = null, mapsLoaded = false, mapsApiKey = null, geminiApiKey = null;
   let currentUser = null;
   const selections = { flight: null, hotel: null, ground: null };
+  const itemStore = {}; // keyed by elemId, stores item data objects
+  let cartOpen = false;
+  // ── Persistent request store (localStorage so employee+manager share data) ──
+  const STORE_KEY = 'fides_requests';
+  function loadRequests() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); } catch { return []; }
+  }
+  function saveRequests(reqs) {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(reqs)); } catch {}
+  }
+  let pendingRequests = loadRequests();
 
   // ── Tab switching ───────────────────────────────────────────────────────────
   function showTab(name, btn) {
@@ -419,6 +512,12 @@
     const panel = document.getElementById('tab-' + name);
     if (panel) panel.classList.add('active');
     if (btn) btn.classList.add('active');
+    // Refresh approval panel with latest selections whenever navigating there
+    if (name === 'approval') {
+      refreshApprovalPanel();
+      if (currentUser?.role !== 'manager') renderEmployeeRequests();
+      else renderManagerRequests();
+    }
   }
 
   // ── Auth ────────────────────────────────────────────────────────────────────
@@ -445,6 +544,16 @@
         loadManagersForAccount(user.managerId?._id || user.managerId || null);
       }
 
+      // Show correct approval view based on role
+      if (user.role === 'manager') {
+        document.getElementById('approval-employee-view').style.display = 'none';
+        document.getElementById('approval-manager-view').style.display = 'block';
+        renderManagerRequests();
+      } else {
+        document.getElementById('approval-employee-view').style.display = 'block';
+        document.getElementById('approval-manager-view').style.display = 'none';
+      }
+
       // Set manager display in Approval tab
       if (user.role === 'manager') {
         document.getElementById('approval-manager-display').textContent = 'You are the manager';
@@ -465,6 +574,9 @@
       document.getElementById('pref-hotel').value = prefs.preferredHotel || '';
       document.getElementById('pref-ride').value = prefs.preferredRide || '';
       if (prefs.darkMode) document.documentElement.setAttribute('data-theme', 'dark');
+
+      // Seed submitted requests list for employees
+      if (user.role !== 'manager') renderEmployeeRequests();
     } catch (e) { console.error(e); }
   }
 
@@ -641,10 +753,10 @@
     const cheapestPrice = Math.min(...sorted.map(o => o.price || Infinity));
     el.innerHTML = `<div class="flights-scroll">${sorted.map((o) => {
       const isBest = o.price === cheapestPrice;
-      const dataStr = JSON.stringify(JSON.stringify(o));
       const elemId = `flight-${o.id}`;
+      itemStore[elemId] = o;
       return `<div class="flight-card${isBest ? ' best' : ''}" id="${elemId}"
-           onclick="selectItem('flight',${dataStr},'${elemId}')">
+           onclick="selectItem('flight','${elemId}')">
         <div class="flight-header">
           <span style="font-size:1rem;">${o.airlineLogo ? `<img style="width:20px;height:20px;object-fit:contain;" src="${o.airlineLogo}" alt=""/>` : '✈️'}</span>
           <div><div class="airline-name">${o.airline || 'Airline'}</div><div class="flight-num">${o.flightNumber || ''} · ${o.stops === 0 ? 'Nonstop' : o.stops + ' stop'}</div></div>
@@ -654,8 +766,8 @@
         <div class="flight-spacer"></div>
         <div class="flight-price">$${(o.price || 0).toFixed(2)}</div>
         ${isBest ? '<div class="flight-tag">★ Best price</div>' : ''}
-        <button class="btn-add-trip" id="btn-flight-${o.id}"
-          onclick="event.stopPropagation();selectItem('flight',${dataStr},'${elemId}');syncAddBtn('flight','${o.id}')">
+        <button class="btn-add-trip" id="btn-${elemId}"
+          onclick="event.stopPropagation();selectItem('flight','${elemId}')">
           + Add to trip
         </button>
       </div>`;
@@ -666,17 +778,17 @@
     const el = document.getElementById('hotel-results');
     const results = data.results || [];
     if (!results.length) { el.innerHTML = '<div class="empty-state"><div class="empty-state-title">No hotels found</div></div>'; return; }
-    el.innerHTML = results.map(h => {
-      const dataStr = JSON.stringify(JSON.stringify(h));
-      const elemId = `hotel-${h.id}`;
+    el.innerHTML = results.map((h, i) => {
+      const elemId = `hotel-h${i}`;
+      itemStore[elemId] = h;
       return `<div class="hotel-card" id="${elemId}"
-           onclick="selectItem('hotel',${dataStr},'${elemId}')">
+           onclick="selectItem('hotel','${elemId}')">
         ${h.photo ? `<img class="hotel-thumb" src="${h.photo}" alt=""/>` : '<div class="hotel-thumb"></div>'}
         <div class="hotel-info"><div class="hotel-name">${h.name}</div><div class="hotel-meta">${'★'.repeat(Math.round(h.rating || 4))} · ${h.address || ''}</div></div>
         <div class="hotel-right">
           <div class="hotel-price">$${(h.price || 0).toFixed(0)}<span class="hotel-sub">/night</span></div>
-          <button class="btn-add-trip" id="btn-hotel-${h.id}"
-            onclick="event.stopPropagation();selectItem('hotel',${dataStr},'${elemId}');syncAddBtn('hotel','${h.id}')">
+          <button class="btn-add-trip" id="btn-${elemId}"
+            onclick="event.stopPropagation();selectItem('hotel','${elemId}')">
             + Add to trip
           </button>
         </div>
@@ -691,15 +803,15 @@
       { icon: '🚗', name: 'Rental car', note: 'Available at terminal', price: '~$55–90/day', id: 'rental' }
     ];
     document.getElementById('ground-results').innerHTML = opts.map(o => {
-      const dataStr = JSON.stringify(JSON.stringify(o));
       const elemId = `ground-${o.id}`;
+      itemStore[elemId] = o;
       return `<div class="ground-card" id="${elemId}"
-           onclick="selectItem('ground',${dataStr},'${elemId}')">
+           onclick="selectItem('ground','${elemId}')">
         <div class="ground-left"><div class="ground-icon">${o.icon}</div><div><div class="ground-name">${o.name}</div><div class="ground-note">${o.note}</div></div></div>
         <div class="ground-right">
           <div class="ground-price">${o.price}</div>
-          <button class="btn-add-trip" id="btn-ground-${o.id}"
-            onclick="event.stopPropagation();selectItem('ground',${dataStr},'${elemId}');syncAddBtn('ground','${o.id}')">
+          <button class="btn-add-trip" id="btn-${elemId}"
+            onclick="event.stopPropagation();selectItem('ground','${elemId}')">
             + Add to trip
           </button>
         </div>
@@ -708,8 +820,9 @@
   }
 
   // ── Selection logic ─────────────────────────────────────────────────────────
-  function selectItem(type, dataStr, elemId) {
-    const data = JSON.parse(dataStr);
+  function selectItem(type, elemId) {
+    const data = itemStore[elemId];
+    if (!data) { console.warn('selectItem: no data for', elemId); return; }
     if (selections[type]) {
       const prev = document.getElementById(selections[type].elemId);
       if (prev) prev.classList.remove('selected');
@@ -728,10 +841,10 @@
   function syncAllAddBtns() {
     ['flight', 'hotel', 'ground'].forEach(type => {
       document.querySelectorAll(`[id^="btn-${type}-"]`).forEach(btn => {
-        const id = btn.id.replace(`btn-${type}-`, '');
-        const isSelected = selections[type] && selections[type].elemId === `${type}-${id}`;
+        const cardId = btn.id.replace(/^btn-/, '');
+        const isSelected = !!(selections[type] && selections[type].elemId === cardId);
         btn.textContent = isSelected ? '✓ Added' : '+ Add to trip';
-        btn.classList.toggle('added', !!isSelected);
+        btn.classList.toggle('added', isSelected);
       });
     });
   }
@@ -758,7 +871,118 @@
       html += `<div class="chip">${g.icon} ${g.name} — ${g.price} <span class="chip-remove" onclick="event.stopPropagation();removeSelection('ground')">×</span></div>`;
     }
     chips.innerHTML = html;
+    updateCart();
     refreshApprovalPanel();
+    // Managers get a direct-book notice instead of approval flow
+    if (currentUser?.role === 'manager') syncManagerBookingNotice();
+  }
+
+  function syncManagerBookingNotice() {
+    const hasAny = selections.flight || selections.hotel || selections.ground;
+    let bar = document.getElementById('manager-book-bar');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'manager-book-bar';
+      bar.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1.1rem;margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;';
+      const searchHero = document.querySelector('.search-hero');
+      if (searchHero) searchHero.insertAdjacentElement('afterend', bar);
+    }
+    if (!hasAny) { bar.style.display = 'none'; return; }
+    bar.style.display = 'flex';
+    const count = [selections.flight, selections.hotel, selections.ground].filter(Boolean).length;
+    bar.innerHTML = `
+      <div style="font-size:0.85rem;">
+        <strong>Manager direct booking</strong>
+        <span style="color:var(--muted);font-size:0.78rem;margin-left:0.5rem;">${count} item${count!==1?'s':''} selected — booked immediately on confirm</span>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="managerDirectBook()">Book now</button>`;
+  }
+
+  function managerDirectBook() {
+    const hasAny = selections.flight || selections.hotel || selections.ground;
+    if (!hasAny) return;
+    const bd = {
+      flight: selections.flight ? selections.flight.data : null,
+      hotel: selections.hotel ? selections.hotel.data : null,
+      ground: selections.ground ? selections.ground.data : null,
+    };
+    const fakeReq = { tripName: 'Direct booking', bookingData: bd, managerNote: '' };
+    addApprovedBookings(fakeReq);
+    clearSelections();
+    // Navigate to Travel tab to show the confirmed bookings
+    showTab('travel', document.querySelectorAll('.nav-tab')[1]);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ── Cart ─────────────────────────────────────────────────────────────────────
+  function toggleCart() {
+    const hasAny = selections.flight || selections.hotel || selections.ground;
+    if (!hasAny && !cartOpen) {
+      // Show a brief tooltip/flash instead of opening empty cart
+      const btn = document.getElementById('cart-btn');
+      btn.style.color = 'var(--muted)';
+      // Still open so user can see "No items" state clearly
+    }
+    cartOpen = !cartOpen;
+    document.getElementById('cart-dropdown').classList.toggle('open', cartOpen);
+    document.getElementById('cart-backdrop').classList.toggle('open', cartOpen);
+  }
+
+  function updateCart() {
+    const hasAny = selections.flight || selections.hotel || selections.ground;
+    const count = [selections.flight, selections.hotel, selections.ground].filter(Boolean).length;
+    const btn = document.getElementById('cart-btn');
+    const badge = document.getElementById('cart-badge');
+    btn.classList.toggle('empty', !hasAny);
+    btn.classList.toggle('has-items', !!hasAny);
+    btn.title = hasAny ? `View cart (${count} item${count !== 1 ? 's' : ''})` : 'Cart is empty';
+    const prevCount = parseInt(badge.textContent) || 0;
+    badge.textContent = count;
+    badge.classList.toggle('empty', !hasAny);
+    if (count > prevCount) {
+      badge.classList.remove('pop');
+      void badge.offsetWidth; // reflow
+      badge.classList.add('pop');
+    }
+
+    const listEl = document.getElementById('cart-items-list');
+    const footerEl = document.getElementById('cart-footer');
+    if (!hasAny) {
+      listEl.innerHTML = `<div class="cart-empty">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="margin-bottom:0.4rem;opacity:0.3"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+        <div>No items selected yet.</div>
+        <div style="font-size:0.75rem;margin-top:0.25rem;opacity:0.7;">Search for a trip and click<br>+ Add to trip on any result.</div>
+      </div>`;
+      footerEl.style.display = 'none';
+      return;
+    }
+    footerEl.style.display = 'flex';
+    let items = '', total = 0;
+    if (selections.flight) {
+      const f = selections.flight.data;
+      const cost = parseFloat(f.price) || 0; total += cost;
+      items += `<div class="cart-item">
+        <div class="cart-item-left"><span class="cart-item-icon">✈️</span><div><div class="cart-item-name">${f.airline} ${f.flightNumber||''}</div><div class="cart-item-price">$${cost.toFixed(2)}</div></div></div>
+        <button class="cart-item-remove" onclick="removeSelection('flight')" title="Remove">×</button>
+      </div>`;
+    }
+    if (selections.hotel) {
+      const h = selections.hotel.data;
+      const cost = parseFloat(h.price) || 0; total += cost;
+      items += `<div class="cart-item">
+        <div class="cart-item-left"><span class="cart-item-icon">🏨</span><div><div class="cart-item-name">${h.name}</div><div class="cart-item-price">$${cost.toFixed(0)}/night</div></div></div>
+        <button class="cart-item-remove" onclick="removeSelection('hotel')" title="Remove">×</button>
+      </div>`;
+    }
+    if (selections.ground) {
+      const g = selections.ground.data;
+      items += `<div class="cart-item">
+        <div class="cart-item-left"><span class="cart-item-icon">${g.icon}</span><div><div class="cart-item-name">${g.name}</div><div class="cart-item-price">${g.price}</div></div></div>
+        <button class="cart-item-remove" onclick="removeSelection('ground')" title="Remove">×</button>
+      </div>`;
+    }
+    listEl.innerHTML = items;
+    document.getElementById('cart-total-amount').textContent = total > 0 ? `$${total.toFixed(2)}` : '—';
   }
 
   // Live-update the approval page "Selected reservations" panel
@@ -843,30 +1067,196 @@
 
   // ── Export to Approval ──────────────────────────────────────────────────────
   function exportToApproval() {
-    // The approval panel is already live — just navigate to it
-    showTab('approval', document.querySelectorAll('.nav-tab')[3]);
+    if (cartOpen) toggleCart();
+    const approvalTab = document.querySelectorAll('.nav-tab')[3];
+    showTab('approval', approvalTab);
+    // Scroll to top so the panel is visible
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   // ── Submit approval ─────────────────────────────────────────────────────────
   function submitApproval() {
     const name = document.getElementById('approval-trip-name').value.trim();
     if (!name) return alert('Please enter a trip name.');
-    const managerText = document.getElementById('approval-manager-display').textContent;
-    const cost  = document.getElementById('approval-cost').value || 'TBD';
-    const dates = document.getElementById('approval-dates').value || 'TBD';
-    const el = document.getElementById('approvals-list');
-    const row = document.createElement('div');
-    row.className = 'approval-row';
-    row.innerHTML = `
-      <div><div class="approval-title">${name}</div><div class="approval-meta">To: ${managerText} · ${dates} · ${cost}</div></div>
-      <div class="approval-right"><span class="badge badge-warning">Pending</span></div>`;
-    el.innerHTML = '';
-    el.appendChild(row);
+    if (!selections.flight && !selections.hotel && !selections.ground) return alert('Please select at least one item to submit.');
+
+    const items = [];
+    let totalCost = 0;
+    if (selections.flight) { const f = selections.flight.data; const cost = parseFloat(f.price)||0; totalCost+=cost; items.push({ icon:'✈️', label:`${f.airline} ${f.flightNumber||''}`, price:`$${cost.toFixed(2)}` }); }
+    if (selections.hotel) { const h = selections.hotel.data; const cost = parseFloat(h.price)||0; totalCost+=cost; items.push({ icon:'🏨', label:h.name, price:`$${cost.toFixed(0)}/night` }); }
+    if (selections.ground) { const g = selections.ground.data; items.push({ icon:g.icon, label:g.name, price:g.price }); }
+
+    const req = {
+      id: Date.now(),
+      tripName: name,
+      employee: currentUser?.displayName || currentUser?.email || 'Unknown employee',
+      employeeId: String(currentUser?._id || currentUser?.id || ''),
+      dates: document.getElementById('approval-dates').value || 'TBD',
+      totalCost: totalCost > 0 ? `$${totalCost.toFixed(2)}` : 'TBD',
+      notes: document.getElementById('approval-notes').value.trim(),
+      managerNote: '',
+      items,
+      // Store full booking data so we can create bookings on approval
+      bookingData: {
+        flight: selections.flight ? selections.flight.data : null,
+        hotel: selections.hotel ? selections.hotel.data : null,
+        ground: selections.ground ? selections.ground.data : null,
+      },
+      status: 'pending',
+      submittedAt: new Date().toLocaleString()
+    };
+    pendingRequests.unshift(req);
+    saveRequests(pendingRequests);
+
+    // Clear cart and selections after submitting
+    clearSelections();
+    document.getElementById('approval-trip-name').value = '';
+    document.getElementById('approval-notes').value = '';
+
+    // Re-render employee submitted list
+    renderEmployeeRequests();
+
     const msg = document.getElementById('approval-msg');
-    msg.textContent = '✓ Approval request submitted.';
+    msg.textContent = '✓ Request submitted to your manager.';
     msg.style.display = 'block';
     setTimeout(() => msg.style.display = 'none', 3000);
+
+    // Update manager view
+    renderManagerRequests();
   }
+
+  // ── Employee submitted requests list ────────────────────────────────────────
+  function renderEmployeeRequests() {
+    pendingRequests = loadRequests();
+    const el = document.getElementById('approvals-list');
+    const myId = String(currentUser?._id || currentUser?.id || '');
+    const mine = pendingRequests.filter(r => String(r.employeeId) === myId);
+    if (!mine.length) {
+      el.innerHTML = `<div class="empty-state" style="border:1px solid var(--border);border-radius:12px;margin-bottom:1.25rem;">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M5 8a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V8z"/></svg>
+        <div class="empty-state-title">No submitted requests</div>
+        <div class="empty-state-sub">Submitted trips will appear here</div></div>`;
+      return;
+    }
+    el.innerHTML = mine.map(r => {
+      const badgeCls = r.status === 'approved' ? 'badge-success' : r.status === 'denied' ? 'badge-error' : 'badge-warning';
+      const badgeLabel = r.status === 'approved' ? '✓ Approved' : r.status === 'denied' ? '✗ Denied' : 'Pending';
+      const managerNoteHtml = r.managerNote
+        ? `<div style="margin-top:0.5rem;font-size:0.78rem;color:var(--muted);padding:0.4rem 0.65rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;">💬 Manager note: ${r.managerNote}</div>`
+        : '';
+      const bookedHtml = r.status === 'approved'
+        ? `<div style="font-size:0.73rem;color:var(--success);margin-top:3px;">🎫 Booked & confirmed</div>`
+        : '';
+      return `<div class="approval-row" id="emp-req-${r.id}" style="flex-direction:column;align-items:flex-start;gap:0.4rem;">
+        <div style="display:flex;justify-content:space-between;width:100%;align-items:flex-start;">
+          <div>
+            <div class="approval-title">${r.tripName}</div>
+            <div class="approval-meta">${r.dates} · ${r.totalCost}</div>
+            ${bookedHtml}
+          </div>
+          <span class="badge ${badgeCls}" id="emp-badge-${r.id}">${badgeLabel}</span>
+        </div>
+        <div style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:7px;overflow:hidden;">
+          ${r.items.map(it => `<div style="display:flex;justify-content:space-between;padding:0.3rem 0.7rem;font-size:0.8rem;border-bottom:1px solid var(--border);"><span>${it.icon} ${it.label}</span><span>${it.price}</span></div>`).join('')}
+        </div>
+        ${managerNoteHtml}
+      </div>`;
+    }).join('');
+  }
+
+  // ── Manager request rendering ───────────────────────────────────────────────
+  function renderManagerRequests() {
+    pendingRequests = loadRequests();
+    const listEl = document.getElementById('manager-requests-list');
+    if (!listEl) return;
+    const pending = pendingRequests.filter(r => r.status === 'pending');
+    const countEl = document.getElementById('mgr-pending-count');
+    if (countEl) countEl.textContent = `${pending.length} pending`;
+
+    if (!pendingRequests.length) {
+      listEl.innerHTML = `<div class="empty-state" style="border:1px solid var(--border);border-radius:12px;padding:2.5rem;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" width="36" height="36"><path d="M9 12l2 2 4-4"/><path d="M5 8a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V8z"/></svg>
+        <div class="empty-state-title">No pending requests</div>
+        <div class="empty-state-sub">Your team's approval requests will appear here</div></div>`;
+      return;
+    }
+
+    listEl.innerHTML = pendingRequests.map(r => {
+      const isPending = r.status === 'pending';
+      const badgeCls = r.status === 'approved' ? 'badge-success' : r.status === 'denied' ? 'badge-error' : 'badge-warning';
+      const badgeLabel = r.status === 'approved' ? '✓ Approved' : r.status === 'denied' ? '✗ Denied' : 'Pending';
+      return `<div class="mgr-request" id="mgr-req-${r.id}">
+        <div class="mgr-request-header">
+          <div>
+            <div class="mgr-request-name">${r.tripName}</div>
+            <div class="mgr-request-from">From ${r.employee} · ${r.dates} · ${r.totalCost}${r.submittedAt ? ' · Submitted '+r.submittedAt : ''}</div>
+          </div>
+          <span class="badge ${badgeCls}">${badgeLabel}</span>
+        </div>
+        <div class="mgr-request-items">
+          ${r.items.map(it => `<div class="mgr-request-item"><span>${it.icon} ${it.label}</span><span>${it.price}</span></div>`).join('')}
+        </div>
+        ${r.notes ? `<div style="font-size:0.8rem;color:var(--muted);margin-bottom:0.85rem;padding:0.5rem 0.75rem;background:var(--bg);border:1px solid var(--border);border-radius:7px;">📝 Employee note: ${r.notes}</div>` : ''}
+        ${isPending ? `
+        <div style="margin-bottom:0.75rem;">
+          <label style="font-size:0.72rem;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);display:block;margin-bottom:0.3rem;">Leave a note (optional)</label>
+          <textarea id="mgr-note-${r.id}" rows="2" style="width:100%;padding:0.5rem 0.75rem;border:1px solid var(--border);border-radius:7px;font-family:inherit;font-size:0.82rem;background:var(--bg);color:var(--text);resize:vertical;" placeholder="Add a note for the employee…">${r.managerNote || ''}</textarea>
+        </div>
+        <div class="mgr-request-actions">
+          <button class="btn-approve" onclick="decideRequest(${r.id},'approved')">✓ Approve</button>
+          <button class="btn-deny" onclick="decideRequest(${r.id},'denied')">✗ Deny</button>
+        </div>` : r.managerNote ? `<div style="font-size:0.8rem;color:var(--muted);padding:0.5rem 0.75rem;background:var(--bg);border:1px solid var(--border);border-radius:7px;">💬 Your note: ${r.managerNote}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  function decideRequest(id, decision) {
+    const req = pendingRequests.find(r => r.id === id);
+    if (!req) return;
+
+    // Capture manager note from textarea
+    const noteEl = document.getElementById(`mgr-note-${id}`);
+    req.managerNote = noteEl ? noteEl.value.trim() : '';
+    req.status = decision;
+    req.decidedAt = new Date().toLocaleString();
+    saveRequests(pendingRequests);
+
+    // If approved, create bookings in the Travel tab from the stored booking data
+    if (decision === 'approved' && req.bookingData) {
+      addApprovedBookings(req);
+    }
+
+    renderManagerRequests();
+
+    // Re-render employee's request list with updated status + manager note
+    renderEmployeeRequests();
+  }
+
+  // ── Create bookings in Travel tab after approval ─────────────────────────────
+function addApprovedBookings(req) {
+  const el = document.getElementById('bookings-list');
+  if (!el) return;
+  if (el.querySelector('.empty-state')) el.innerHTML = '';
+
+  const bd = req.bookingData;
+  let newHtml = '';
+
+  if (bd.flight) {
+    const f = bd.flight;
+    newHtml += `<div class="ticket-card"><div class="ticket-icon">✈️</div><div style="flex:1"><div class="ticket-route">${f.airline || 'Flight'} ${f.flightNumber || ''}</div><div class="ticket-meta">${f.stops === 0 ? 'Nonstop' : (f.stops||1)+' stop'} · ${req.tripName}</div></div><div class="ticket-right"><span class="badge badge-success">Confirmed</span><div style="font-size:0.82rem;color:var(--muted);margin-top:4px;">$${parseFloat(f.price||0).toFixed(2)}</div></div></div>`;
+  }
+  if (bd.hotel) {
+    const h = bd.hotel;
+    newHtml += `<div class="ticket-card"><div class="ticket-icon">🏨</div><div style="flex:1"><div class="ticket-route">${h.name}</div><div class="ticket-meta">${'★'.repeat(Math.round(h.rating||4))} · ${req.tripName}</div></div><div class="ticket-right"><span class="badge badge-success">Confirmed</span><div style="font-size:0.82rem;color:var(--muted);margin-top:4px;">$${parseFloat(h.price||0).toFixed(0)}/night</div></div></div>`;
+  }
+  if (bd.ground) {
+    const g = bd.ground;
+    newHtml += `<div class="ticket-card"><div class="ticket-icon">${g.icon}</div><div style="flex:1"><div class="ticket-route">${g.name}</div><div class="ticket-meta">${g.note || ''} · ${req.tripName}</div></div><div class="ticket-right"><span class="badge badge-success">Confirmed</span><div style="font-size:0.82rem;color:var(--muted);margin-top:4px;">${g.price}</div></div></div>`;
+  }
+
+  el.innerHTML = newHtml + el.innerHTML;
+}
+
 
   // ── Geolocation ─────────────────────────────────────────────────────────────
   function useLocation() {
@@ -879,63 +1269,93 @@
 
   // ── Bookings ─────────────────────────────────────────────────────────────────
   async function loadBookings() {
-    try {
-      const res = await fetch(`${API}/bookings`, { headers: { Authorization: `Bearer ${token()}` } });
-      const { bookings } = await res.json();
-      const el = document.getElementById('bookings-list');
-      if (!bookings || !bookings.length) return;
-      el.innerHTML = bookings.map(b => `
-        <div class="ticket-card">
-          <div class="ticket-icon">${b.type === 'flight' ? '✈️' : b.type === 'hotel' ? '🏨' : '🚗'}</div>
-          <div><div class="ticket-route">${b.details.origin || b.details.hotelName || b.type}</div><div class="ticket-meta">${b.details.airline || ''} · ${b.details.status || 'pending'}</div></div>
-          <div class="ticket-right"><span class="badge badge-${b.details.status === 'confirmed' ? 'success' : 'warning'}">${b.details.status}</span><div style="font-size:0.82rem;color:var(--muted);margin-top:4px;">$${b.totalPrice || 0}</div></div>
-        </div>`).join('');
-    } catch (e) { console.error(e); }
-  }
+  try {
+    const res = await fetch(`${API}/bookings`, { headers: { Authorization: `Bearer ${token()}` } });
+    const { bookings } = await res.json();
+    const el = document.getElementById('bookings-list');
+    if (!bookings || !bookings.length) return;
+    if (el.querySelector('.empty-state')) el.innerHTML = '';
+    el.innerHTML = bookings.map(b => `
+      <div class="ticket-card"><div class="ticket-icon">${b.type === 'flight' ? '✈️' : b.type === 'hotel' ? '🏨' : '🚗'}</div>
+      <div><div class="ticket-route">${b.details.origin || b.details.hotelName || b.type}</div><div class="ticket-meta">${b.details.airline || ''} · ${b.details.status || 'pending'}</div></div>
+      <div class="ticket-right"><span class="badge badge-${b.details.status === 'confirmed' ? 'success' : 'warning'}">${b.details.status}</span><div style="font-size:0.82rem;color:var(--muted);margin-top:4px;">$${b.totalPrice || 0}</div></div></div>`).join('') + el.innerHTML;
+  } catch (e) { console.error(e); }
+}
 
   // ── AI Chat ──────────────────────────────────────────────────────────────────
+  const chatHistory = [];
+
   async function sendChat() {
     const input = document.getElementById('chat-input');
     const msg = input.value.trim();
     if (!msg) return;
     input.value = '';
-    const messages = document.getElementById('chat-messages');
-    messages.innerHTML += `<div class="chat-msg user">${msg}</div>`;
-    if (!geminiApiKey) {
-      messages.innerHTML += `<div class="chat-msg agent">Gemini API key not configured on the server.</div>`;
-      messages.scrollTop = messages.scrollHeight;
-      return;
-    }
+    const messagesEl = document.getElementById('chat-messages');
+    messagesEl.innerHTML += `<div class="chat-msg user">${msg}</div>`;
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+
+    chatHistory.push({ role: 'user', content: msg });
+
     const el = document.createElement('div');
     el.className = 'chat-msg agent';
     el.innerHTML = '<span class="spinner"></span> Thinking…';
-    messages.appendChild(el);
-    messages.scrollTop = messages.scrollHeight;
+    messagesEl.appendChild(el);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+
     try {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey}`, {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: msg }] }] })
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          system: 'You are Fides, a helpful corporate travel assistant. Help employees plan trips, find the best flights and hotels, understand travel policies, and answer any travel-related questions. Be concise and practical.',
+          messages: chatHistory
+        })
       });
       const data = await res.json();
-      el.innerHTML = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, no response.';
-    } catch { el.innerHTML = 'Error contacting Gemini.'; }
-    messages.scrollTop = messages.scrollHeight;
+      const reply = data.content?.[0]?.text || 'Sorry, I couldn\'t generate a response.';
+      el.innerHTML = reply.replace(/\n/g, '<br>');
+      chatHistory.push({ role: 'assistant', content: reply });
+    } catch (err) {
+      el.innerHTML = 'Error reaching the AI. Please try again.';
+      chatHistory.pop(); // remove failed user message
+    }
+    messagesEl.scrollTop = messagesEl.scrollHeight;
   }
 
   // ── Feedback ─────────────────────────────────────────────────────────────────
-  function sendFeedback() {
-    const val = document.getElementById('feedback-input').value.trim();
-    if (!val) return;
+  async function sendFeedback() {
+  const val = document.getElementById('feedback-input').value.trim();
+  if (!val) return;
+  try {
+    await fetch(`${API}/feedback`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+      body: JSON.stringify({ feedback: val })
+    });
     document.getElementById('feedback-input').value = '';
     alert('Thanks for your feedback!');
-  }
+  } catch(e) { alert('Could not send feedback.'); }
+}
 
   // ── Init ──────────────────────────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', async () => {
     await loadUser();
     await loadBookings();
     loadMapsApi().then(() => { if (typeof google !== 'undefined') initAutocomplete(); });
+  });
+
+  // Live-sync across tabs: when localStorage changes (another tab submitted/decided),
+  // refresh whichever approval view is visible
+  window.addEventListener('storage', (e) => {
+    if (e.key !== 'fides_requests') return;
+    pendingRequests = loadRequests();
+    if (currentUser?.role === 'manager') {
+      renderManagerRequests();
+    } else {
+      renderEmployeeRequests();
+    }
   });
 </script>
 </body>

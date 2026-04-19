@@ -12,6 +12,7 @@ app.use(express.static(__dirname));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/travel', require('./routes/travel'));
 app.use('/api/bookings', require('./routes/bookings'));
+app.use('/api/feedback', require('./routes/feedback'));
 
 app.get('/api/config', (req, res) => {
   res.json({ googleMapsKey: process.env.GOOGLE_MAPS_KEY });

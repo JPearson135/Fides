@@ -1,25 +1,75 @@
 # Dependencies
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
 
 # Environment variables
 .env
 .env.local
-.env.*.local
+.env.production
 
 # Logs
 logs/
 *.log
-npm-debug.log*
+logs.txt
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
 
 # OS files
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Editor folders
+# IDE files
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
 
-# Runtime
-*.pid
-*.seed
-*.pid.lock
+# Build files
+dist/
+build/
+.next/
+
+# PM2 logs
+.pm2/
+
+# MongoDB local data
+/data/
+mongodb-data/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Backup files
+*.bak
+*.backup
+
+# SSL certificates (if any)
+*.pem
+*.crt
+*.key
+
+# User uploads (if you add this later)
+uploads/
+avatars/
+
+# Testing
+coverage/
+.nyc_output/
+
+# Railway / deployment specific
+.railway/
+.vercel/
+.netlify/
