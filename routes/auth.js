@@ -19,7 +19,13 @@ function authMiddleware(req, res, next) {
 router.post('/register', async (req, res) => {
   try {
     const hashed = await bcrypt.hash(req.body.password, 10);
-    const user = await User.create({ email: req.body.email, password: hashed });
+    const userData = {
+      email: req.body.email,
+      password: hashed,
+      role: req.body.role || 'employee'
+    };
+    if (req.body.managerId) userData.managerId = req.body.managerId;
+    const user = await User.create(userData);
     res.json({ message: 'User created' });
   } catch (err) {
     if (err.code === 11000) {
@@ -45,6 +51,8 @@ router.post('/login', async (req, res) => {
         id: user._id,
         email: user.email,
         displayName: user.displayName || '',
+        role: user.role || 'employee',
+        managerId: user.managerId || null,
         preferences: user.preferences || {}
       }
     });
@@ -55,7 +63,7 @@ router.post('/login', async (req, res) => {
 
 router.get('/me', authMiddleware, async (req, res) => {
   try {
-    const user = await User.findById(req.userId).select('-password');
+    const user = await User.findById(req.userId).select('-password').populate('managerId', 'email displayName');
     if (!user) return res.status(404).json({ error: 'User not found' });
     res.json({ user });
   } catch (err) {
@@ -68,12 +76,13 @@ router.patch('/me', authMiddleware, async (req, res) => {
     const updates = {};
     if (req.body.displayName !== undefined) updates.displayName = req.body.displayName;
     if (req.body.preferences !== undefined) updates.preferences = req.body.preferences;
+    if (req.body.managerId !== undefined) updates.managerId = req.body.managerId || null;
 
     const user = await User.findByIdAndUpdate(
       req.userId,
       { $set: updates },
       { new: true }
-    ).select('-password');
+    ).select('-password').populate('managerId', 'email displayName');
 
     res.json({ user });
   } catch (err) {
@@ -81,4 +90,25 @@ router.patch('/me', authMiddleware, async (req, res) => {
   }
 });
 
+// Public — used on the registration page before the user has a token
+router.get('/managers-public', async (req, res) => {
+  try {
+    const managers = await User.find({ role: 'manager' }).select('_id email displayName');
+    res.json({ managers });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Authenticated — used inside the app
+router.get('/managers', authMiddleware, async (req, res) => {
+  try {
+    const managers = await User.find({ role: 'manager' }).select('_id email displayName');
+    res.json({ managers });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
+module.exports.authMiddleware = authMiddleware;

@@ -2,14 +2,21 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
-app.use('/api/auth', require('./routes/auth'));
 
-const path = require('path');
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/travel', require('./routes/travel'));
+app.use('/api/bookings', require('./routes/bookings'));
+
+app.get('/api/config', (req, res) => {
+  res.json({ googleMapsKey: process.env.GOOGLE_MAPS_KEY });
+});
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'Login.html'));
 });

@@ -16,6 +16,16 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  role: {
+    type: String,
+    enum: ['employee', 'manager'],
+    default: 'employee'
+  },
+  managerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
+  },
   preferences: {
     darkMode: { type: Boolean, default: false },
     shareLocation: { type: Boolean, default: true },
