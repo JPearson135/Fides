@@ -73,3 +73,6 @@ coverage/
 .railway/
 .vercel/
 .netlify/
+
+# Feedback log (contains user data)
+log.txt

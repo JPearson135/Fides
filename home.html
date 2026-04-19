@@ -246,6 +246,9 @@
       <button class="nav-tab" onclick="showTab('account',this)">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Account
       </button>
+      <button class="nav-tab" id="nav-hr" onclick="showTab('hr',this)" style="display:none;">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>HR
+      </button>
     </div>
     <button class="cart-btn" id="cart-btn" onclick="toggleCart()" title="View selected items">
       <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
@@ -333,6 +336,70 @@
     <div class="card-title">Upcoming bookings</div>
     <div id="bookings-list">
       <div class="empty-state" style="border:1px solid var(--border);border-radius:12px;margin-bottom:1.25rem;"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg><div class="empty-state-title">No upcoming bookings</div><div class="empty-state-sub">Your confirmed trips will appear here</div></div>
+    </div>
+
+    <!-- Reimbursable Expenses -->
+    <div style="margin-top:1.75rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+        <div>
+          <div class="card-title" style="margin-bottom:0.1rem;">Reimbursable Expenses</div>
+          <div style="font-size:0.75rem;color:var(--muted);">Log out-of-pocket purchases you'll submit for reimbursement.</div>
+        </div>
+        <button class="btn btn-sm btn-primary" onclick="toggleExpenseForm()">+ Add expense</button>
+      </div>
+
+      <!-- Add expense form (hidden by default) -->
+      <div id="expense-form-wrap" style="display:none;" class="card" style="margin-bottom:1rem;">
+        <div class="form-row">
+          <div class="form-group" style="margin:0;">
+            <label>Description</label>
+            <input type="text" id="exp-desc" placeholder="e.g. Airport parking, client dinner…"/>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label>Amount (USD)</label>
+            <input type="number" id="exp-amount" placeholder="0.00" min="0" step="0.01"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="margin:0;">
+            <label>Date</label>
+            <input type="date" id="exp-date"/>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label>Category</label>
+            <select id="exp-category">
+              <option value="meals">🍽️ Meals & dining</option>
+              <option value="transport">🚗 Ground transport</option>
+              <option value="parking">🅿️ Parking & tolls</option>
+              <option value="lodging">🏨 Lodging</option>
+              <option value="baggage">🧳 Baggage fees</option>
+              <option value="supplies">📦 Business supplies</option>
+              <option value="other">📋 Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:0.85rem;">
+          <label>Notes (optional)</label>
+          <input type="text" id="exp-notes" placeholder="Receipt #, vendor name, trip purpose…"/>
+        </div>
+        <div style="display:flex;gap:0.5rem;">
+          <button class="btn btn-primary" onclick="addExpense()">Save expense</button>
+          <button class="btn" onclick="toggleExpenseForm()">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Expense list -->
+      <div id="expense-list">
+        <div class="empty-state" style="border:1px solid var(--border);border-radius:12px;padding:2rem;" id="expense-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--border)" stroke-width="1.2" width="32" height="32"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="13" y2="15"/></svg>
+          <div class="empty-state-title">No expenses logged</div>
+          <div class="empty-state-sub">Add receipts and out-of-pocket costs here</div>
+        </div>
+      </div>
+      <div id="expense-totals" style="display:none;background:var(--accent-light);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem;display:none;align-items:center;justify-content:space-between;font-size:0.85rem;">
+        <span style="color:var(--muted);">Total pending reimbursement</span>
+        <strong id="expense-total-amount" style="font-size:1rem;">$0.00</strong>
+      </div>
     </div>
   </div>
 
@@ -443,6 +510,12 @@
           </div>
           <button class="btn btn-primary" onclick="saveProfile()" style="width:100%;">Save changes</button>
           <div id="profile-msg" style="margin-top:0.75rem;font-size:0.82rem;color:var(--success);display:none;">Saved.</div>
+          <div style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--border);">
+            <div class="card-title" style="color:var(--error);margin-bottom:0.5rem;">Danger zone</div>
+            <div style="font-size:0.8rem;color:var(--muted);margin-bottom:0.75rem;">Permanently delete your account and all associated data. This cannot be undone.</div>
+            <button class="btn" onclick="confirmDeleteAccount()" style="border-color:var(--error);color:var(--error);width:100%;">Delete my account</button>
+            <div id="delete-account-msg" style="margin-top:0.6rem;font-size:0.82rem;display:none;"></div>
+          </div>
         </div>
       </div>
       <div>
@@ -450,7 +523,6 @@
           <div class="card-title">Preferences</div>
           <div class="toggle-row"><div><div class="toggle-label">Dark mode</div><div class="toggle-sub">Switch to dark theme</div></div><label class="toggle"><input type="checkbox" id="pref-dark" onchange="applyPrefs()"/><span class="toggle-slider"></span></label></div>
           <div class="toggle-row"><div><div class="toggle-label">Share location</div><div class="toggle-sub">Used for nearby suggestions</div></div><label class="toggle"><input type="checkbox" id="pref-location"/><span class="toggle-slider"></span></label></div>
-          <div class="toggle-row"><div><div class="toggle-label">Price alerts</div><div class="toggle-sub">Notify when prices drop</div></div><label class="toggle"><input type="checkbox" id="pref-price"/><span class="toggle-slider"></span></label></div>
           <div class="toggle-row"><div><div class="toggle-label">Approval reminders</div><div class="toggle-sub">Remind me of pending requests</div></div><label class="toggle"><input type="checkbox" id="pref-approval"/><span class="toggle-slider"></span></label></div>
         </div>
         <div class="card">
@@ -459,6 +531,70 @@
           <div class="form-group"><label>Preferred hotel type</label><input type="text" id="pref-hotel" placeholder="No preference"/></div>
           <div class="form-group" style="margin:0;"><label>Preferred ground transport</label><input type="text" id="pref-ride" placeholder="No preference"/></div>
         </div>
+        <div class="card">
+          <div class="card-title">Previous trips</div>
+          <div id="account-previous-trips">
+            <div class="empty-state" style="padding:1.25rem 1rem;border:1px solid var(--border);border-radius:10px;">
+              <div class="empty-state-title">No previous trips</div>
+              <div class="empty-state-sub">Approved trips will appear here</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Pending Reimbursements</div>
+          <div style="font-size:0.78rem;color:var(--muted);margin-bottom:0.85rem;">Out-of-pocket expenses awaiting reimbursement.</div>
+          <div id="account-reimbursements">
+            <div class="empty-state" style="padding:1.25rem 1rem;border:1px solid var(--border);border-radius:10px;">
+              <div class="empty-state-title">No pending reimbursements</div>
+              <div class="empty-state-sub">Expenses you log in the Travel tab will appear here</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- HR DASHBOARD -->
+  <div class="tab-content" id="tab-hr">
+    <div class="section-title">HR Dashboard</div>
+    <div class="section-sub">All employee travel activity across the organization.</div>
+
+    <!-- Summary cards -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem;" id="hr-stats">
+      <div class="card" style="text-align:center;">
+        <div class="card-title">Upcoming Trips</div>
+        <div style="font-size:2rem;font-weight:600;" id="hr-stat-trips">–</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="card-title">Pending Approvals</div>
+        <div style="font-size:2rem;font-weight:600;" id="hr-stat-approvals">–</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="card-title">Pending Reimbursements</div>
+        <div style="font-size:2rem;font-weight:600;" id="hr-stat-reimbursements">–</div>
+      </div>
+    </div>
+
+    <!-- Upcoming trips (confirmed bookings with future dates) -->
+    <div class="card" style="margin-bottom:1.25rem;">
+      <div class="card-title" style="margin-bottom:0.9rem;">📅 All Upcoming Trips</div>
+      <div id="hr-trips-list">
+        <div class="empty-state"><div class="empty-state-title">Loading…</div></div>
+      </div>
+    </div>
+
+    <!-- Pending approvals from all employees -->
+    <div class="card" style="margin-bottom:1.25rem;">
+      <div class="card-title" style="margin-bottom:0.9rem;">⏳ Pending Approval Requests</div>
+      <div id="hr-approvals-list">
+        <div class="empty-state"><div class="empty-state-title">Loading…</div></div>
+      </div>
+    </div>
+
+    <!-- Reimbursements -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom:0.9rem;">💳 Submitted Reimbursements</div>
+      <div id="hr-reimbursements-list">
+        <div class="empty-state"><div class="empty-state-title">Loading…</div></div>
       </div>
     </div>
   </div>
@@ -479,18 +615,98 @@
     </div>
     <div>
       <div class="footer-title">Support</div>
-      <button class="footer-link">Help center</button>
-      <button class="footer-link">Privacy policy</button>
-      <button class="footer-link">Terms of service</button>
+      <button class="footer-link" onclick="toggleGuidelines()">Company travel guidelines ▾</button>
+      <button class="footer-link" onclick="openModal('privacy-modal')">Privacy policy</button>
+      <button class="footer-link" onclick="openModal('tos-modal')">Terms of service</button>
     </div>
   </div>
-  <div class="footer-bottom">© 2025 Fides. All rights reserved.</div>
+
+  <!-- Expandable travel guidelines panel -->
+  <div id="guidelines-panel" style="display:none;border-top:1px solid var(--border);background:var(--surface);">
+    <div style="max-width:1100px;margin:0 auto;padding:1.5rem 1.5rem;">
+      <div style="font-size:0.72rem;font-weight:500;text-transform:uppercase;letter-spacing:0.09em;color:var(--muted);margin-bottom:1rem;">Company Travel Guidelines</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;font-size:0.82rem;color:var(--muted);line-height:1.7;">
+        <div>
+          <div style="font-weight:600;color:var(--text);margin-bottom:0.4rem;">✈️ Flights</div>
+          Book economy class for domestic flights under 6 hours. Business class requires manager pre-approval. Book at least 14 days in advance when possible. Use company-preferred carriers where available.
+        </div>
+        <div>
+          <div style="font-weight:600;color:var(--text);margin-bottom:0.4rem;">🏨 Hotels</div>
+          Standard rate cap is $250/night (major metro) or $175/night (other). Book through approved platforms. Extended stays beyond 7 nights require VP sign-off. Incidentals charged to personal card.
+        </div>
+        <div>
+          <div style="font-weight:600;color:var(--text);margin-bottom:0.4rem;">🍽️ Meals & Incidentals</div>
+          Per-diem allowance: $35/day domestic, $55/day international. Alcohol is non-reimbursable unless a client entertainment exception is approved. Keep all receipts for claims over $25.
+        </div>
+        <div>
+          <div style="font-weight:600;color:var(--text);margin-bottom:0.4rem;">🚗 Ground Transport</div>
+          Use rideshare or public transit where practical. Rental cars require manager approval. Mileage reimbursed at current IRS rate. Parking receipts required for reimbursement.
+        </div>
+        <div>
+          <div style="font-weight:600;color:var(--text);margin-bottom:0.4rem;">📋 Expense Reporting</div>
+          Submit expense reports within 30 days of travel. Attach receipts for all items over $25. Missing documentation may result in non-reimbursement. Use the Reimbursable Expenses tracker in the Travel tab to log costs on the go.
+        </div>
+        <div>
+          <div style="font-weight:600;color:var(--text);margin-bottom:0.4rem;">🔒 Approval Flow</div>
+          All travel estimated over $500 requires manager approval before booking. Submit via the Approval tab. Managers must respond within 3 business days. Emergency travel: contact your manager directly.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-bottom">© 2026 Fides. All rights reserved.</div>
 </footer>
 
+<!-- Privacy Policy Modal -->
+<div id="privacy-modal" style="display:none;position:fixed;inset:0;z-index:500;display:none;align-items:center;justify-content:center;" onclick="closeModalBg(event,'privacy-modal')">
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,0.45);"></div>
+  <div style="position:relative;z-index:1;background:var(--surface);border:1px solid var(--border);border-radius:14px;max-width:560px;width:90%;max-height:80vh;overflow-y:auto;padding:2rem;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.25rem;">
+      <div style="font-family:'DM Serif Display',serif;font-size:1.3rem;">Privacy Policy</div>
+      <button onclick="closeModal('privacy-modal')" style="background:none;border:none;cursor:pointer;font-size:1.3rem;color:var(--muted);line-height:1;padding:0.1rem;">×</button>
+    </div>
+    <div style="font-size:0.84rem;color:var(--muted);line-height:1.8;">
+      <p style="margin-bottom:1rem;"><strong style="color:var(--text);">Your data stays with you.</strong> Fides collects only the information required to provide its travel planning and booking assistance features. We do not sell, rent, share, or otherwise disclose your personal data to any third party, advertiser, or external organization.</p>
+      <p style="margin-bottom:1rem;"><strong style="color:var(--text);">What we collect:</strong> Your email address, display name, travel preferences, booking records, expense notes, and manager relationship are stored securely to personalize your experience. Approval requests are visible only to you and your designated manager.</p>
+      <p style="margin-bottom:1rem;"><strong style="color:var(--text);">AI interactions:</strong> Messages sent to the AI Travel Agent are processed via the configured AI provider (e.g., Google Vertex AI) solely to generate your response. Conversation history is session-only and is not stored permanently.</p>
+      <p style="margin-bottom:1rem;"><strong style="color:var(--text);">Third-party APIs:</strong> Flight and hotel search queries are forwarded to travel APIs (e.g., Duffel) to retrieve results. Only search parameters (locations, dates) are transmitted — never your personal account details.</p>
+      <p><strong style="color:var(--text);">Data deletion:</strong> You may request deletion of your account and associated data at any time by contacting your organization's Fides administrator.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Terms of Service Modal -->
+<div id="tos-modal" style="display:none;position:fixed;inset:0;z-index:500;display:none;align-items:center;justify-content:center;" onclick="closeModalBg(event,'tos-modal')">
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,0.45);"></div>
+  <div style="position:relative;z-index:1;background:var(--surface);border:1px solid var(--border);border-radius:14px;max-width:560px;width:90%;max-height:80vh;overflow-y:auto;padding:2rem;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.25rem;">
+      <div style="font-family:'DM Serif Display',serif;font-size:1.3rem;">Terms of Service</div>
+      <button onclick="closeModal('tos-modal')" style="background:none;border:none;cursor:pointer;font-size:1.3rem;color:var(--muted);line-height:1;padding:0.1rem;">×</button>
+    </div>
+    <div style="font-size:0.84rem;color:var(--muted);line-height:1.8;">
+      <p style="margin-bottom:1rem;"><strong style="color:var(--text);">Data you willingly provide to Fides</strong></p>
+      <p style="margin-bottom:1rem;">By using Fides, you acknowledge that you are voluntarily providing the following information to help Fides deliver its travel assistance services:</p>
+      <ul style="margin-bottom:1rem;padding-left:1.25rem;display:flex;flex-direction:column;gap:0.4rem;">
+        <li><strong style="color:var(--text);">Account information</strong> — your email address and chosen display name, used to identify your account and personalize your experience.</li>
+        <li><strong style="color:var(--text);">Travel search data</strong> — origin, destination, and travel dates entered during trip searches, used solely to retrieve flight and hotel results on your behalf.</li>
+        <li><strong style="color:var(--text);">Booking selections</strong> — flights, hotels, and ground transport you select and submit for manager approval.</li>
+        <li><strong style="color:var(--text);">Expense notes</strong> — purchase descriptions and amounts you log in the Reimbursable Expenses tracker, stored for your personal reference and reimbursement submissions.</li>
+        <li><strong style="color:var(--text);">Preferences</strong> — your notification settings, preferred airline/hotel/transport, and dark mode choice.</li>
+        <li><strong style="color:var(--text);">AI chat messages</strong> — questions and prompts you send to the AI Travel Agent, forwarded to the AI provider to generate your response.</li>
+        <li><strong style="color:var(--text);">Feedback</strong> — any text you voluntarily submit via the feedback box, logged to help improve Fides.</li>
+        <li><strong style="color:var(--text);">Location</strong> (if enabled) — your approximate coordinates when you use "Use my location," used only to autofill your trip origin.</li>
+      </ul>
+      <p style="margin-bottom:1rem;">None of this data is sold or shared with third parties for marketing purposes. It is used exclusively to operate and improve Fides for you and your organization.</p>
+      <p style="font-size:0.78rem;color:var(--border);">Last updated: April 2026</p>
+    </div>
+  </div>
+</div>
+
 <script>
-  const API = 'http://localhost:3000/api';
+  const API = '/api';
   const token = () => sessionStorage.getItem('token');
-  let mapInstance = null, directionsRenderer = null, mapsLoaded = false, mapsApiKey = null, geminiApiKey = null;
+  const MEALS_BUDGET_PER_DAY = 35;
+  let mapInstance = null, directionsRenderer = null, mapsLoaded = false, mapsApiKey = null, geminiApiKey = null, vertexAiKey = null, openAiKey = null, groqKey = null;
   let currentUser = null;
   const selections = { flight: null, hotel: null, ground: null };
   const itemStore = {}; // keyed by elemId, stores item data objects
@@ -505,6 +721,36 @@
   }
   let pendingRequests = loadRequests();
 
+  function parseDateOnly(val) {
+    if (!val) return null;
+    const d = new Date(`${val}T00:00:00`);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+
+  function getTravelWindow() {
+    const departRaw = document.getElementById('depart-date')?.value || '';
+    const returnRaw = document.getElementById('return-date')?.value || '';
+    const depart = parseDateOnly(departRaw);
+    const ret = parseDateOnly(returnRaw);
+
+    if (!depart || !ret || ret <= depart) {
+      return {
+        departRaw,
+        returnRaw,
+        hotelNights: 1,
+        travelDays: 1
+      };
+    }
+
+    const diffDays = Math.round((ret - depart) / 86400000);
+    return {
+      departRaw,
+      returnRaw,
+      hotelNights: Math.max(1, diffDays),
+      travelDays: Math.max(1, diffDays + 1)
+    };
+  }
+
   // ── Tab switching ───────────────────────────────────────────────────────────
   function showTab(name, btn) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -518,12 +764,275 @@
       if (currentUser?.role !== 'manager') renderEmployeeRequests();
       else renderManagerRequests();
     }
+    if (name === 'account') {
+      renderPreviousTrips();
+      renderAccountReimbursements();
+    }
+    if (name === 'hr') {
+      loadHRDashboard();
+    }
   }
 
   // ── Auth ────────────────────────────────────────────────────────────────────
   function signOut() { sessionStorage.removeItem('token'); window.location.href = '/'; }
 
-  async function loadUser() {
+  async function confirmDeleteAccount() {
+    const confirmed = confirm('Are you sure you want to permanently delete your account and ALL your data? This cannot be undone.');
+    if (!confirmed) return;
+    const msgEl = document.getElementById('delete-account-msg');
+    try {
+      const res = await fetch(`${API}/auth/me`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token()}` }
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        msgEl.style.display = 'block';
+        msgEl.style.color = 'var(--error)';
+        msgEl.textContent = data.error || 'Could not delete account.';
+        return;
+      }
+      alert('Your account and all data have been deleted.');
+      signOut();
+    } catch (e) {
+      msgEl.style.display = 'block';
+      msgEl.style.color = 'var(--error)';
+      msgEl.textContent = 'Could not reach the server.';
+    }
+  }
+
+  // ── HR Dashboard ────────────────────────────────────────────────────────────
+  async function loadHRDashboard() {
+    // Show loading state
+    ['hr-trips-list','hr-approvals-list','hr-reimbursements-list'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = '<div class="empty-state" style="padding:1.5rem;"><div class="empty-state-title" style="color:var(--muted);">Loading…</div></div>';
+    });
+
+    try {
+      const [bookingsRes, requestsRes] = await Promise.all([
+        fetch(`${API}/auth/hr/bookings`, { headers: { Authorization: `Bearer ${token()}` } }),
+        fetch(`${API}/auth/hr/requests`,  { headers: { Authorization: `Bearer ${token()}` } })
+      ]);
+
+      const { bookings }  = bookingsRes.ok  ? await bookingsRes.json()  : { bookings: [] };
+      const { requests }  = requestsRes.ok  ? await requestsRes.json()  : { requests: [] };
+
+      const now = new Date();
+
+      // ── Upcoming trips: confirmed bookings with future travel dates ──
+      const upcomingTrips = bookings.filter(b => {
+        if (b.details?.status !== 'confirmed') return false;
+        const d = b.details?.departureDate || b.details?.checkIn;
+        return d && new Date(d) > now;
+      }).sort((a, b) => {
+        const da = new Date(a.details?.departureDate || a.details?.checkIn);
+        const db = new Date(b.details?.departureDate || b.details?.checkIn);
+        return da - db;
+      });
+
+      // ── Pending approvals from DB ──
+      const pendingApprovals = requests.filter(r => r.status === 'pending');
+
+      // ── All bookings as reimbursements (employees + managers) ──
+      // /hr/bookings already returns all users; we just need to also pull manager
+      // bookings which are included since the endpoint queries Booking globally.
+      const reimbursements = bookings.filter(b => b.totalPrice > 0);
+      const pendingReimbCount = reimbursements.filter(b => (b.reimbursementStatus || 'pending') === 'pending').length;
+
+      // Stats
+      document.getElementById('hr-stat-trips').textContent = upcomingTrips.length;
+      document.getElementById('hr-stat-approvals').textContent = pendingApprovals.length;
+      document.getElementById('hr-stat-reimbursements').textContent = pendingReimbCount;
+
+      // ── Render upcoming trips ──
+      const tripsEl = document.getElementById('hr-trips-list');
+      if (!upcomingTrips.length) {
+        tripsEl.innerHTML = '<div class="empty-state" style="padding:1.5rem;"><div class="empty-state-title">No upcoming confirmed trips</div></div>';
+      } else {
+        tripsEl.innerHTML = upcomingTrips.map(b => {
+          const user = b.userId;
+          const name = user?.displayName || user?.email || 'Unknown';
+          const typeIcon = b.type === 'flight' ? '✈️' : b.type === 'hotel' ? '🏨' : '🚗';
+          const date = b.details?.departureDate || b.details?.checkIn;
+          const dateStr = date ? new Date(date).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) : '–';
+          const detail = b.type === 'flight'
+            ? `${b.details?.airline || ''} ${b.details?.flightNumber || ''}`.trim()
+            : b.type === 'hotel' ? b.details?.hotelName || '' : b.details?.groundType || '';
+          return `<div class="ticket-card">
+            <div class="ticket-icon">${typeIcon}</div>
+            <div style="flex:1;min-width:0;">
+              <div class="ticket-route">${detail || b.type}</div>
+              <div class="ticket-meta">${name} · ${dateStr}${b.notes ? ' · ' + b.notes : ''}</div>
+            </div>
+            <div class="ticket-right">
+              <div style="font-size:0.95rem;font-weight:600;">$${(b.totalPrice || 0).toFixed(2)}</div>
+              <span class="badge badge-success">Confirmed</span>
+            </div>
+          </div>`;
+        }).join('');
+      }
+
+      // ── Render pending approvals ──
+      const approvalsEl = document.getElementById('hr-approvals-list');
+      if (!pendingApprovals.length) {
+        approvalsEl.innerHTML = '<div class="empty-state" style="padding:1.5rem;"><div class="empty-state-title">No pending approvals</div></div>';
+      } else {
+        approvalsEl.innerHTML = pendingApprovals.map(r => {
+          const emp = r.employeeId;
+          const empName = emp?.displayName || emp?.email || 'Unknown';
+          const mgr = r.managerId;
+          const mgrName = mgr?.displayName || mgr?.email || 'No manager';
+          const submittedAt = r.submittedAt ? new Date(r.submittedAt).toLocaleDateString([], { month: 'short', day: 'numeric' }) : '';
+          return `<div class="approval-row">
+            <div>
+              <div class="approval-title">${r.tripName}</div>
+              <div class="approval-meta">${empName} → ${mgrName} · ${r.dates} · ${r.totalCost}${submittedAt ? ' · ' + submittedAt : ''}</div>
+            </div>
+            <span class="badge badge-warning">Pending</span>
+          </div>`;
+        }).join('');
+      }
+
+      // ── Render reimbursements ──
+      const reimbEl = document.getElementById('hr-reimbursements-list');
+      if (!reimbursements.length) {
+        reimbEl.innerHTML = '<div class="empty-state" style="padding:1.5rem;"><div class="empty-state-title">No reimbursements on record</div></div>';
+      } else {
+        // Sort: pending first, then by booking date desc
+        const sortedReimb = [...reimbursements].sort((a, b) => {
+          const aP = (a.reimbursementStatus || 'pending') === 'pending' ? 0 : 1;
+          const bP = (b.reimbursementStatus || 'pending') === 'pending' ? 0 : 1;
+          if (aP !== bP) return aP - bP;
+          return new Date(b.bookingDate) - new Date(a.bookingDate);
+        });
+        reimbEl.innerHTML = sortedReimb.map(b => {
+          const user = b.userId;
+          const name = user?.displayName || user?.email || 'Unknown';
+          const roleLabel = user?.role === 'manager' ? '🏢 Manager' : '👤 Employee';
+          const typeIcon = b.type === 'flight' ? '✈️' : b.type === 'hotel' ? '🏨' : '🚗';
+          const bookedOn = new Date(b.bookingDate).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+          const typeLabel = b.type.charAt(0).toUpperCase() + b.type.slice(1);
+          const rs = b.reimbursementStatus || 'pending';
+          const badgeCls = rs === 'paid' ? 'badge-success' : rs === 'denied' ? 'badge-error' : 'badge-warning';
+          const badgeLabel = rs === 'paid' ? '✓ Paid' : rs === 'denied' ? '✗ Denied' : 'Pending';
+          const actionBtns = rs === 'pending'
+            ? `<div style="display:flex;gap:0.4rem;margin-top:0.5rem;">
+                <button class="btn-approve" style="flex:1;padding:0.35rem 0.5rem;font-size:0.75rem;" onclick="hrSetReimbursement('${b._id}','paid')">✓ Mark paid</button>
+                <button class="btn-deny"    style="flex:1;padding:0.35rem 0.5rem;font-size:0.75rem;" onclick="hrSetReimbursement('${b._id}','denied')">✗ Deny</button>
+               </div>`
+            : `<button class="btn btn-sm" style="margin-top:0.5rem;font-size:0.72rem;color:var(--muted);" onclick="hrSetReimbursement('${b._id}','pending')">↩ Reset to pending</button>`;
+          return `<div class="ticket-card" id="reimb-${b._id}" style="flex-direction:column;align-items:stretch;gap:0;${rs==='paid'?'opacity:0.65;':''}">
+            <div style="display:flex;align-items:center;gap:0.85rem;">
+              <div class="ticket-icon">${typeIcon}</div>
+              <div style="flex:1;min-width:0;">
+                <div class="ticket-route">${typeLabel}${b.notes ? ' — ' + b.notes : ''}</div>
+                <div class="ticket-meta">${name} <span style="opacity:0.6;">(${roleLabel})</span> · Booked ${bookedOn}</div>
+              </div>
+              <div class="ticket-right">
+                <div style="font-size:0.95rem;font-weight:600;">$${(b.totalPrice || 0).toFixed(2)}</div>
+                <span class="badge ${badgeCls}" id="reimb-badge-${b._id}">${badgeLabel}</span>
+              </div>
+            </div>
+            <div id="reimb-actions-${b._id}">${actionBtns}</div>
+          </div>`;
+        }).join('');
+      }
+    } catch (e) {
+      console.error('HR dashboard error:', e);
+      ['hr-trips-list','hr-approvals-list','hr-reimbursements-list'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '<div class="empty-state" style="padding:1.5rem;"><div class="empty-state-title" style="color:var(--error);">Could not load data</div></div>';
+      });
+    }
+  }
+
+  async function hrSetReimbursement(bookingId, status) {
+    try {
+      const res = await fetch(`${API}/bookings/${bookingId}/reimbursement`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+        body: JSON.stringify({ reimbursementStatus: status })
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        return alert(d.error || 'Could not update reimbursement.');
+      }
+      // Update badge and action buttons in place without full reload
+      const badgeEl = document.getElementById(`reimb-badge-${bookingId}`);
+      const actionsEl = document.getElementById(`reimb-actions-${bookingId}`);
+      if (badgeEl) {
+        badgeEl.className = `badge ${status === 'paid' ? 'badge-success' : status === 'denied' ? 'badge-error' : 'badge-warning'}`;
+        badgeEl.textContent = status === 'paid' ? '✓ Paid' : status === 'denied' ? '✗ Denied' : 'Pending';
+      }
+      if (actionsEl) {
+        actionsEl.innerHTML = status === 'pending'
+          ? `<div style="display:flex;gap:0.4rem;margin-top:0.5rem;">
+               <button class="btn-approve" style="flex:1;padding:0.35rem 0.5rem;font-size:0.75rem;" onclick="hrSetReimbursement('${bookingId}','paid')">✓ Mark paid</button>
+               <button class="btn-deny"    style="flex:1;padding:0.35rem 0.5rem;font-size:0.75rem;" onclick="hrSetReimbursement('${bookingId}','denied')">✗ Deny</button>
+             </div>`
+          : `<button class="btn btn-sm" style="margin-top:0.5rem;font-size:0.72rem;color:var(--muted);" onclick="hrSetReimbursement('${bookingId}','pending')">↩ Reset to pending</button>`;
+      }
+      // Update stat count
+      const statEl = document.getElementById('hr-stat-reimbursements');
+      if (statEl) {
+        // Count badge elements that still show the pending label
+        const pendingCount = [...document.querySelectorAll('[id^="reimb-badge-"]')]
+          .filter(el => el.classList.contains('badge-warning')).length;
+        statEl.textContent = pendingCount;
+      }
+    } catch (e) {
+      alert('Could not reach the server.');
+    }
+  }
+
+  async function renderAccountReimbursements() {
+    const el = document.getElementById('account-reimbursements');
+    if (!el) return;
+    try {
+      const res = await fetch(`${API}/bookings`, { headers: { Authorization: `Bearer ${token()}` } });
+      if (!res.ok) throw new Error();
+      const { bookings } = await res.json();
+      // Show all bookings with a price — each employee only sees their own (API enforces this)
+      const all = (bookings || []).filter(b => b.totalPrice > 0);
+      if (!all.length) {
+        el.innerHTML = `<div class="empty-state" style="padding:1.25rem 1rem;border:1px solid var(--border);border-radius:10px;">
+          <div class="empty-state-title">No reimbursements yet</div>
+          <div class="empty-state-sub">Approved bookings will appear here once confirmed</div>
+        </div>`;
+        return;
+      }
+      const typeIcon = t => t === 'flight' ? '✈️' : t === 'hotel' ? '🏨' : '🚗';
+      const statusMap = {
+        paid:    { cls: 'badge-success', label: '✓ Reimbursed' },
+        denied:  { cls: 'badge-error',   label: '✗ Denied' },
+        pending: { cls: 'badge-warning', label: 'Awaiting reimbursement' }
+      };
+      const pending = all.filter(b => (b.reimbursementStatus || 'pending') === 'pending');
+      const pendingTotal = pending.reduce((s, b) => s + (b.totalPrice || 0), 0);
+      el.innerHTML = all.map(b => {
+        const rs = b.reimbursementStatus || 'pending';
+        const { cls, label } = statusMap[rs] || statusMap.pending;
+        const bookedOn = new Date(b.bookingDate).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+        return `<div style="display:flex;align-items:center;gap:0.85rem;padding:0.75rem 0.9rem;border:1px solid var(--border);border-radius:10px;background:var(--bg);margin-bottom:0.55rem;${rs==='paid'?'opacity:0.6;':''}">
+          <div style="font-size:1.3rem;flex-shrink:0;">${typeIcon(b.type)}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:500;font-size:0.88rem;">${b.type.charAt(0).toUpperCase()+b.type.slice(1)}${b.notes ? ' — '+b.notes : ''}</div>
+            <div style="font-size:0.73rem;color:var(--muted);">Booked ${bookedOn}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:0.95rem;font-weight:600;">$${(b.totalPrice||0).toFixed(2)}</div>
+            <span class="badge ${cls}" style="font-size:0.65rem;">${label}</span>
+          </div>
+        </div>`;
+      }).join('') +
+      (pending.length ? `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0.9rem;background:var(--accent-light);border:1px solid var(--border);border-radius:8px;font-size:0.84rem;color:var(--muted);">
+        <span>Total pending</span><strong style="color:var(--text);">$${pendingTotal.toFixed(2)}</strong>
+      </div>` : '');
+    } catch {
+      el.innerHTML = `<div class="empty-state" style="padding:1.25rem 1rem;border:1px solid var(--border);border-radius:10px;"><div class="empty-state-title">Could not load</div></div>`;
+    }
+  }
     if (!token()) return signOut();
     try {
       const res = await fetch(`${API}/auth/me`, { headers: { Authorization: `Bearer ${token()}` } });
@@ -535,8 +1044,23 @@
       document.getElementById('account-email').textContent = user.email || '';
       document.getElementById('account-display-name').textContent = user.displayName || user.email || 'Fides User';
       document.getElementById('account-avatar').textContent = (user.displayName || user.email || 'F')[0].toUpperCase();
-      document.getElementById('account-role-badge').textContent = user.role === 'manager' ? '🏢 Manager' : '👤 Employee';
+      document.getElementById('account-role-badge').textContent = user.role === 'manager' ? '🏢 Manager' : user.role === 'hr' ? '🔐 HR Admin' : '👤 Employee';
       document.getElementById('profile-name').value = user.displayName || '';
+
+      // HR superuser: show only HR tab, hide regular tabs, load HR dashboard
+      if (user.role === 'hr') {
+        document.getElementById('nav-hr').style.display = '';
+        document.querySelectorAll('.nav-tab:not(#nav-hr)').forEach(t => t.style.display = 'none');
+        document.querySelector('.cart-btn').style.display = 'none';
+        document.getElementById('approval-employee-view').style.display = 'none';
+        document.getElementById('approval-manager-view').style.display = 'none';
+        // Switch to HR tab
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-hr').classList.add('active');
+        document.getElementById('nav-hr').classList.add('active');
+        loadHRDashboard();
+        return;
+      }
 
       // Show manager picker in Account only for employees
       if (user.role === 'employee') {
@@ -568,7 +1092,6 @@
       const prefs = user.preferences || {};
       document.getElementById('pref-dark').checked = !!prefs.darkMode;
       document.getElementById('pref-location').checked = prefs.shareLocation !== false;
-      document.getElementById('pref-price').checked = prefs.priceAlerts !== false;
       document.getElementById('pref-approval').checked = prefs.approvalReminders !== false;
       document.getElementById('pref-airline').value = prefs.preferredAirline || '';
       document.getElementById('pref-hotel').value = prefs.preferredHotel || '';
@@ -577,6 +1100,7 @@
 
       // Seed submitted requests list for employees
       if (user.role !== 'manager') renderEmployeeRequests();
+      renderPreviousTrips();
     } catch (e) { console.error(e); }
   }
 
@@ -595,7 +1119,6 @@
     const preferences = {
       darkMode: document.getElementById('pref-dark').checked,
       shareLocation: document.getElementById('pref-location').checked,
-      priceAlerts: document.getElementById('pref-price').checked,
       approvalReminders: document.getElementById('pref-approval').checked,
       preferredAirline: document.getElementById('pref-airline').value.trim(),
       preferredHotel: document.getElementById('pref-hotel').value.trim(),
@@ -633,6 +1156,9 @@
       const cfg = await res.json();
       mapsApiKey = cfg.googleMapsKey;
       geminiApiKey = cfg.geminiKey;
+      vertexAiKey = cfg.vertexAiKey || null;
+      openAiKey = cfg.openAiKey || null;
+      groqKey = cfg.groqKey || null;
     } catch (e) { console.warn('Could not load /api/config'); }
     if (!mapsApiKey) return;
     mapsLoaded = true;
@@ -989,13 +1515,25 @@
   function refreshApprovalPanel() {
     const listEl = document.getElementById('approval-reservations-list');
     if (!listEl) return;
+
+    const mealsChk = document.getElementById('chk-meals');
+    const flightChk = document.getElementById('chk-flights');
+    const hotelChk = document.getElementById('chk-hotel');
+    const groundChk = document.getElementById('chk-ground');
+    if (flightChk) flightChk.checked = !!selections.flight;
+    if (hotelChk) hotelChk.checked = !!selections.hotel;
+    if (groundChk) groundChk.checked = !!selections.ground;
+
     const hasAny = selections.flight || selections.hotel || selections.ground;
-    if (!hasAny) {
+    const includeMeals = !!(mealsChk && mealsChk.checked);
+    if (!hasAny && !includeMeals) {
       listEl.innerHTML = `<div id="approval-no-selection" style="padding:0.75rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:0.82rem;color:var(--muted);margin-bottom:1rem;">No items selected yet — add flights, hotels, or ground transport from the Search tab.</div>`;
       const costEl = document.getElementById('approval-cost');
       if (costEl && costEl.dataset.autofilled) { costEl.value = ''; delete costEl.dataset.autofilled; }
       return;
     }
+
+    const travel = getTravelWindow();
     let rows = '', totalCost = 0;
     if (selections.flight) {
       const f = selections.flight.data;
@@ -1015,17 +1553,19 @@
     }
     if (selections.hotel) {
       const h = selections.hotel.data;
-      const cost = parseFloat(h.price) || 0;
-      totalCost += cost;
+      const nightlyCost = parseFloat(h.price) || 0;
+      const nights = travel.hotelNights;
+      const hotelTotal = nightlyCost * nights;
+      totalCost += hotelTotal;
       rows += `<div class="approval-res-item">
         <div class="approval-res-left"><span class="approval-res-icon">🏨</span><div>
           <div class="approval-res-title">${h.name}</div>
           <div class="approval-res-meta">${'★'.repeat(Math.round(h.rating||4))}${h.address ? ' &nbsp;·&nbsp; '+h.address : ''}</div>
         </div></div>
-        <div class="approval-res-right"><span class="approval-res-price">$${cost.toFixed(0)}<span style="font-size:0.7rem;color:var(--muted)">/night</span></span>
+        <div class="approval-res-right"><span class="approval-res-price">$${nightlyCost.toFixed(0)}<span style="font-size:0.7rem;color:var(--muted)">/night</span></span>
+          <span style="font-size:0.72rem;color:var(--muted);">$${hotelTotal.toFixed(2)} total (${nights} night${nights === 1 ? '' : 's'})</span>
           <span class="approval-res-remove" onclick="removeSelection('hotel')">×</span></div>
       </div>`;
-      document.getElementById('chk-hotel').checked = true;
     }
     if (selections.ground) {
       const g = selections.ground.data;
@@ -1037,8 +1577,21 @@
         <div class="approval-res-right"><span class="approval-res-price">${g.price}</span>
           <span class="approval-res-remove" onclick="removeSelection('ground')">×</span></div>
       </div>`;
-      document.getElementById('chk-ground').checked = true;
     }
+
+    if (includeMeals) {
+      const days = travel.travelDays;
+      const mealsTotal = MEALS_BUDGET_PER_DAY * days;
+      totalCost += mealsTotal;
+      rows += `<div class="approval-res-item">
+        <div class="approval-res-left"><span class="approval-res-icon">🍽️</span><div>
+          <div class="approval-res-title">Meals & incidentals</div>
+          <div class="approval-res-meta">$${MEALS_BUDGET_PER_DAY}/day × ${days} day${days === 1 ? '' : 's'}</div>
+        </div></div>
+        <div class="approval-res-right"><span class="approval-res-price">$${mealsTotal.toFixed(2)}</span></div>
+      </div>`;
+    }
+
     if (totalCost > 0) {
       rows += `<div class="approval-res-total"><span>Estimated total</span><strong>$${totalCost.toFixed(2)}</strong></div>`;
       const costEl = document.getElementById('approval-cost');
@@ -1075,62 +1628,129 @@
   }
 
   // ── Submit approval ─────────────────────────────────────────────────────────
-  function submitApproval() {
+  async function submitApproval() {
     const name = document.getElementById('approval-trip-name').value.trim();
     if (!name) return alert('Please enter a trip name.');
     if (!selections.flight && !selections.hotel && !selections.ground) return alert('Please select at least one item to submit.');
 
     const items = [];
-    let totalCost = 0;
-    if (selections.flight) { const f = selections.flight.data; const cost = parseFloat(f.price)||0; totalCost+=cost; items.push({ icon:'✈️', label:`${f.airline} ${f.flightNumber||''}`, price:`$${cost.toFixed(2)}` }); }
-    if (selections.hotel) { const h = selections.hotel.data; const cost = parseFloat(h.price)||0; totalCost+=cost; items.push({ icon:'🏨', label:h.name, price:`$${cost.toFixed(0)}/night` }); }
+    let totalCostNum = 0;
+    const travel = getTravelWindow();
+    const includeMeals = !!document.getElementById('chk-meals')?.checked;
+    if (selections.flight) { const f = selections.flight.data; const cost = parseFloat(f.price)||0; totalCostNum+=cost; items.push({ icon:'✈️', label:`${f.airline} ${f.flightNumber||''}`, price:`$${cost.toFixed(2)}` }); }
+    if (selections.hotel) {
+      const h = selections.hotel.data;
+      const nightlyCost = parseFloat(h.price)||0;
+      const nights = travel.hotelNights;
+      const hotelTotal = nightlyCost * nights;
+      totalCostNum += hotelTotal;
+      items.push({ icon:'🏨', label:`${h.name} (${nights} night${nights === 1 ? '' : 's'})`, price:`$${nightlyCost.toFixed(0)}/night · $${hotelTotal.toFixed(2)} total` });
+    }
     if (selections.ground) { const g = selections.ground.data; items.push({ icon:g.icon, label:g.name, price:g.price }); }
+    if (includeMeals) {
+      const mealDays = travel.travelDays;
+      const mealsTotal = MEALS_BUDGET_PER_DAY * mealDays;
+      totalCostNum += mealsTotal;
+      items.push({ icon:'🍽️', label:`Meals & incidentals (${mealDays} day${mealDays === 1 ? '' : 's'})`, price:`$${MEALS_BUDGET_PER_DAY}/day · $${mealsTotal.toFixed(2)} total` });
+    }
 
-    const req = {
-      id: Date.now(),
+    const body = {
       tripName: name,
-      employee: currentUser?.displayName || currentUser?.email || 'Unknown employee',
-      employeeId: String(currentUser?._id || currentUser?.id || ''),
       dates: document.getElementById('approval-dates').value || 'TBD',
-      totalCost: totalCost > 0 ? `$${totalCost.toFixed(2)}` : 'TBD',
+      totalCost: totalCostNum > 0 ? `$${totalCostNum.toFixed(2)}` : 'TBD',
       notes: document.getElementById('approval-notes').value.trim(),
-      managerNote: '',
       items,
-      // Store full booking data so we can create bookings on approval
       bookingData: {
         flight: selections.flight ? selections.flight.data : null,
-        hotel: selections.hotel ? selections.hotel.data : null,
+        hotel:  selections.hotel  ? selections.hotel.data  : null,
         ground: selections.ground ? selections.ground.data : null,
       },
-      status: 'pending',
-      submittedAt: new Date().toLocaleString()
+      hotelNights: selections.hotel ? travel.hotelNights : 0,
+      mealDays: includeMeals ? travel.travelDays : 0,
+      mealsTotal: includeMeals ? MEALS_BUDGET_PER_DAY * travel.travelDays : 0,
     };
-    pendingRequests.unshift(req);
-    saveRequests(pendingRequests);
 
-    // Clear cart and selections after submitting
+    try {
+      const res = await fetch(`${API}/requests`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        return alert(d.error || 'Could not submit request.');
+      }
+      // Also mirror to localStorage so manager sees it in real-time in the same session
+      const { request } = await res.json();
+      const localReq = { ...body, id: request._id, _id: request._id, employee: currentUser?.displayName || currentUser?.email || 'Unknown employee', employeeId: String(currentUser?._id || currentUser?.id || ''), status: 'pending', managerNote: '', submittedAt: new Date().toLocaleString() };
+      pendingRequests.unshift(localReq);
+      saveRequests(pendingRequests);
+    } catch (e) {
+      // If API fails, fall back to localStorage only
+      const localReq = { ...body, id: Date.now(), employee: currentUser?.displayName || currentUser?.email || 'Unknown employee', employeeId: String(currentUser?._id || currentUser?.id || ''), status: 'pending', managerNote: '', submittedAt: new Date().toLocaleString() };
+      pendingRequests.unshift(localReq);
+      saveRequests(pendingRequests);
+    }
+
     clearSelections();
     document.getElementById('approval-trip-name').value = '';
     document.getElementById('approval-notes').value = '';
-
-    // Re-render employee submitted list
     renderEmployeeRequests();
 
     const msg = document.getElementById('approval-msg');
     msg.textContent = '✓ Request submitted to your manager.';
     msg.style.display = 'block';
     setTimeout(() => msg.style.display = 'none', 3000);
-
-    // Update manager view
     renderManagerRequests();
   }
 
+  async function persistApprovedBookings(req) {
+    const payload = {
+      employeeId: req.employeeId,
+      tripName: req.tripName,
+      dates: req.dates,
+      bookingData: req.bookingData,
+      hotelNights: req.hotelNights || 1
+    };
+
+    const res = await fetch(`${API}/bookings/from-approval`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || 'Could not persist approved booking.');
+    }
+    return res.json();
+  }
+
   // ── Employee submitted requests list ────────────────────────────────────────
-  function renderEmployeeRequests() {
-    pendingRequests = loadRequests();
+  async function renderEmployeeRequests() {
     const el = document.getElementById('approvals-list');
-    const myId = String(currentUser?._id || currentUser?.id || '');
-    const mine = pendingRequests.filter(r => String(r.employeeId) === myId);
+    if (!el) return;
+
+    let mine = [];
+    try {
+      const res = await fetch(`${API}/requests`, { headers: { Authorization: `Bearer ${token()}` } });
+      if (res.ok) {
+        const { requests } = await res.json();
+        mine = requests; // already filtered to this employee by the server
+        // Sync back to localStorage so manager can see in same browser session
+        const myId = String(currentUser?._id || currentUser?.id || '');
+        const others = pendingRequests.filter(r => String(r.employeeId) !== myId);
+        const dbMapped = requests.map(r => ({ ...r, id: r._id, employeeId: String(r.employeeId?._id || r.employeeId), employee: r.employeeId?.displayName || r.employeeId?.email || 'Unknown' }));
+        pendingRequests = [...others, ...dbMapped];
+        saveRequests(pendingRequests);
+      } else {
+        throw new Error('API unavailable');
+      }
+    } catch {
+      // Fallback to localStorage
+      const myId = String(currentUser?._id || currentUser?.id || '');
+      mine = pendingRequests.filter(r => String(r.employeeId) === myId);
+    }
+
     if (!mine.length) {
       el.innerHTML = `<div class="empty-state" style="border:1px solid var(--border);border-radius:12px;margin-bottom:1.25rem;">
         <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M5 8a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V8z"/></svg>
@@ -1139,6 +1759,7 @@
       return;
     }
     el.innerHTML = mine.map(r => {
+      const rid = r._id || r.id;
       const badgeCls = r.status === 'approved' ? 'badge-success' : r.status === 'denied' ? 'badge-error' : 'badge-warning';
       const badgeLabel = r.status === 'approved' ? '✓ Approved' : r.status === 'denied' ? '✗ Denied' : 'Pending';
       const managerNoteHtml = r.managerNote
@@ -1147,17 +1768,17 @@
       const bookedHtml = r.status === 'approved'
         ? `<div style="font-size:0.73rem;color:var(--success);margin-top:3px;">🎫 Booked & confirmed</div>`
         : '';
-      return `<div class="approval-row" id="emp-req-${r.id}" style="flex-direction:column;align-items:flex-start;gap:0.4rem;">
+      return `<div class="approval-row" id="emp-req-${rid}" style="flex-direction:column;align-items:flex-start;gap:0.4rem;">
         <div style="display:flex;justify-content:space-between;width:100%;align-items:flex-start;">
           <div>
             <div class="approval-title">${r.tripName}</div>
             <div class="approval-meta">${r.dates} · ${r.totalCost}</div>
             ${bookedHtml}
           </div>
-          <span class="badge ${badgeCls}" id="emp-badge-${r.id}">${badgeLabel}</span>
+          <span class="badge ${badgeCls}" id="emp-badge-${rid}">${badgeLabel}</span>
         </div>
         <div style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:7px;overflow:hidden;">
-          ${r.items.map(it => `<div style="display:flex;justify-content:space-between;padding:0.3rem 0.7rem;font-size:0.8rem;border-bottom:1px solid var(--border);"><span>${it.icon} ${it.label}</span><span>${it.price}</span></div>`).join('')}
+          ${(r.items||[]).map(it => `<div style="display:flex;justify-content:space-between;padding:0.3rem 0.7rem;font-size:0.8rem;border-bottom:1px solid var(--border);"><span>${it.icon} ${it.label}</span><span>${it.price}</span></div>`).join('')}
         </div>
         ${managerNoteHtml}
       </div>`;
@@ -1165,15 +1786,33 @@
   }
 
   // ── Manager request rendering ───────────────────────────────────────────────
-  function renderManagerRequests() {
-    pendingRequests = loadRequests();
+  async function renderManagerRequests() {
     const listEl = document.getElementById('manager-requests-list');
     if (!listEl) return;
-    const pending = pendingRequests.filter(r => r.status === 'pending');
+
+    let requests = [];
+    try {
+      const res = await fetch(`${API}/requests`, { headers: { Authorization: `Bearer ${token()}` } });
+      if (res.ok) {
+        const data = await res.json();
+        requests = data.requests || [];
+        // Sync to localStorage for real-time cross-tab updates
+        const mapped = requests.map(r => ({ ...r, id: r._id, employeeId: String(r.employeeId?._id || r.employeeId), employee: r.employeeId?.displayName || r.employeeId?.email || 'Unknown' }));
+        pendingRequests = mapped;
+        saveRequests(pendingRequests);
+      } else {
+        throw new Error('API unavailable');
+      }
+    } catch {
+      pendingRequests = loadRequests();
+      requests = pendingRequests;
+    }
+
+    const pending = requests.filter(r => r.status === 'pending');
     const countEl = document.getElementById('mgr-pending-count');
     if (countEl) countEl.textContent = `${pending.length} pending`;
 
-    if (!pendingRequests.length) {
+    if (!requests.length) {
       listEl.innerHTML = `<div class="empty-state" style="border:1px solid var(--border);border-radius:12px;padding:2.5rem;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" width="36" height="36"><path d="M9 12l2 2 4-4"/><path d="M5 8a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V8z"/></svg>
         <div class="empty-state-title">No pending requests</div>
@@ -1181,55 +1820,116 @@
       return;
     }
 
-    listEl.innerHTML = pendingRequests.map(r => {
+    listEl.innerHTML = requests.map(r => {
+      const rid = r._id || r.id;
+      const empName = r.employeeId?.displayName || r.employeeId?.email || r.employee || 'Unknown';
       const isPending = r.status === 'pending';
       const badgeCls = r.status === 'approved' ? 'badge-success' : r.status === 'denied' ? 'badge-error' : 'badge-warning';
       const badgeLabel = r.status === 'approved' ? '✓ Approved' : r.status === 'denied' ? '✗ Denied' : 'Pending';
-      return `<div class="mgr-request" id="mgr-req-${r.id}">
+      const submittedAt = r.submittedAt ? new Date(r.submittedAt).toLocaleString() : r.submittedAt || '';
+      return `<div class="mgr-request" id="mgr-req-${rid}">
         <div class="mgr-request-header">
           <div>
             <div class="mgr-request-name">${r.tripName}</div>
-            <div class="mgr-request-from">From ${r.employee} · ${r.dates} · ${r.totalCost}${r.submittedAt ? ' · Submitted '+r.submittedAt : ''}</div>
+            <div class="mgr-request-from">From ${empName} · ${r.dates} · ${r.totalCost}${submittedAt ? ' · Submitted ' + submittedAt : ''}</div>
           </div>
           <span class="badge ${badgeCls}">${badgeLabel}</span>
         </div>
         <div class="mgr-request-items">
-          ${r.items.map(it => `<div class="mgr-request-item"><span>${it.icon} ${it.label}</span><span>${it.price}</span></div>`).join('')}
+          ${(r.items||[]).map(it => `<div class="mgr-request-item"><span>${it.icon} ${it.label}</span><span>${it.price}</span></div>`).join('')}
         </div>
         ${r.notes ? `<div style="font-size:0.8rem;color:var(--muted);margin-bottom:0.85rem;padding:0.5rem 0.75rem;background:var(--bg);border:1px solid var(--border);border-radius:7px;">📝 Employee note: ${r.notes}</div>` : ''}
         ${isPending ? `
         <div style="margin-bottom:0.75rem;">
           <label style="font-size:0.72rem;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);display:block;margin-bottom:0.3rem;">Leave a note (optional)</label>
-          <textarea id="mgr-note-${r.id}" rows="2" style="width:100%;padding:0.5rem 0.75rem;border:1px solid var(--border);border-radius:7px;font-family:inherit;font-size:0.82rem;background:var(--bg);color:var(--text);resize:vertical;" placeholder="Add a note for the employee…">${r.managerNote || ''}</textarea>
+          <textarea id="mgr-note-${rid}" rows="2" style="width:100%;padding:0.5rem 0.75rem;border:1px solid var(--border);border-radius:7px;font-family:inherit;font-size:0.82rem;background:var(--bg);color:var(--text);resize:vertical;" placeholder="Add a note for the employee…">${r.managerNote || ''}</textarea>
         </div>
         <div class="mgr-request-actions">
-          <button class="btn-approve" onclick="decideRequest(${r.id},'approved')">✓ Approve</button>
-          <button class="btn-deny" onclick="decideRequest(${r.id},'denied')">✗ Deny</button>
+          <button class="btn-approve" onclick="decideRequest('${rid}','approved')">✓ Approve</button>
+          <button class="btn-deny" onclick="decideRequest('${rid}','denied')">✗ Deny</button>
         </div>` : r.managerNote ? `<div style="font-size:0.8rem;color:var(--muted);padding:0.5rem 0.75rem;background:var(--bg);border:1px solid var(--border);border-radius:7px;">💬 Your note: ${r.managerNote}</div>` : ''}
       </div>`;
     }).join('');
   }
 
-  function decideRequest(id, decision) {
-    const req = pendingRequests.find(r => r.id === id);
-    if (!req) return;
+  async function decideRequest(rid, decision) {
+    const noteEl = document.getElementById(`mgr-note-${rid}`);
+    const managerNote = noteEl ? noteEl.value.trim() : '';
 
-    // Capture manager note from textarea
-    const noteEl = document.getElementById(`mgr-note-${id}`);
-    req.managerNote = noteEl ? noteEl.value.trim() : '';
-    req.status = decision;
-    req.decidedAt = new Date().toLocaleString();
-    saveRequests(pendingRequests);
+    try {
+      const res = await fetch(`${API}/requests/${rid}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+        body: JSON.stringify({ status: decision, managerNote })
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        return alert(d.error || 'Could not update request.');
+      }
+      const { request } = await res.json();
+      // Sync to localStorage
+      const idx = pendingRequests.findIndex(r => String(r._id || r.id) === String(rid));
+      if (idx !== -1) { pendingRequests[idx].status = decision; pendingRequests[idx].managerNote = managerNote; }
+      saveRequests(pendingRequests);
 
-    // If approved, create bookings in the Travel tab from the stored booking data
-    if (decision === 'approved' && req.bookingData) {
-      addApprovedBookings(req);
+      // If approved, create DB bookings
+      if (decision === 'approved' && request.bookingData) {
+        try {
+          const persisted = await persistApprovedBookings({ ...request, employeeId: String(request.employeeId?._id || request.employeeId) });
+          const myId = String(currentUser?._id || currentUser?.id || '');
+          if (myId === String(request.employeeId?._id || request.employeeId)) {
+            addApprovedBookings(request);
+          }
+        } catch (err) {
+          alert(`Approved, but booking persistence failed: ${err.message}`);
+        }
+      }
+    } catch {
+      // Fallback: update localStorage only
+      const req = pendingRequests.find(r => String(r._id || r.id) === String(rid));
+      if (req) { req.managerNote = managerNote; req.status = decision; req.decidedAt = new Date().toLocaleString(); }
+      saveRequests(pendingRequests);
+      if (decision === 'approved' && req?.bookingData) {
+        try { await persistApprovedBookings(req); } catch {}
+        addApprovedBookings(req);
+      }
     }
 
     renderManagerRequests();
-
-    // Re-render employee's request list with updated status + manager note
     renderEmployeeRequests();
+    renderPreviousTrips();
+  }
+
+  async function renderPreviousTrips() {
+    const el = document.getElementById('account-previous-trips');
+    if (!el) return;
+
+    let approved = [];
+    try {
+      const res = await fetch(`${API}/requests`, { headers: { Authorization: `Bearer ${token()}` } });
+      if (res.ok) {
+        const { requests } = await res.json();
+        approved = requests.filter(r => r.status === 'approved');
+      } else { throw new Error(); }
+    } catch {
+      const myId = String(currentUser?._id || currentUser?.id || '');
+      approved = pendingRequests.filter(r => String(r.employeeId) === myId && r.status === 'approved');
+    }
+
+    if (!approved.length) {
+      el.innerHTML = `<div class="empty-state" style="padding:1.25rem 1rem;border:1px solid var(--border);border-radius:10px;">
+        <div class="empty-state-title">No previous trips</div>
+        <div class="empty-state-sub">Approved trips will appear here</div>
+      </div>`;
+      return;
+    }
+    el.innerHTML = approved.map(r => `<div style="border:1px solid var(--border);border-radius:8px;padding:0.65rem 0.8rem;margin-bottom:0.55rem;background:var(--bg);">
+      <div style="display:flex;justify-content:space-between;gap:0.6rem;align-items:center;">
+        <div style="font-size:0.84rem;font-weight:500;">${r.tripName}</div>
+        <span class="badge badge-success">Approved</span>
+      </div>
+      <div style="font-size:0.75rem;color:var(--muted);margin-top:2px;">${r.dates} · ${r.totalCost}</div>
+    </div>`).join('');
   }
 
   // ── Create bookings in Travel tab after approval ─────────────────────────────
@@ -1273,12 +1973,14 @@ function addApprovedBookings(req) {
     const res = await fetch(`${API}/bookings`, { headers: { Authorization: `Bearer ${token()}` } });
     const { bookings } = await res.json();
     const el = document.getElementById('bookings-list');
-    if (!bookings || !bookings.length) return;
+    // Only show bookings that have NOT been fully reimbursed
+    const active = (bookings || []).filter(b => (b.reimbursementStatus || 'pending') !== 'paid');
+    if (!active.length) return;
     if (el.querySelector('.empty-state')) el.innerHTML = '';
-    el.innerHTML = bookings.map(b => `
+    el.innerHTML = active.map(b => `
       <div class="ticket-card"><div class="ticket-icon">${b.type === 'flight' ? '✈️' : b.type === 'hotel' ? '🏨' : '🚗'}</div>
-      <div><div class="ticket-route">${b.details.origin || b.details.hotelName || b.type}</div><div class="ticket-meta">${b.details.airline || ''} · ${b.details.status || 'pending'}</div></div>
-      <div class="ticket-right"><span class="badge badge-${b.details.status === 'confirmed' ? 'success' : 'warning'}">${b.details.status}</span><div style="font-size:0.82rem;color:var(--muted);margin-top:4px;">$${b.totalPrice || 0}</div></div></div>`).join('') + el.innerHTML;
+      <div><div class="ticket-route">${b.details.airline || b.details.hotelName || b.details.groundType || b.type}</div><div class="ticket-meta">${b.notes || ''}</div></div>
+      <div class="ticket-right"><span class="badge badge-${b.details.status === 'confirmed' ? 'success' : 'warning'}">${b.details.status}</span><div style="font-size:0.82rem;color:var(--muted);margin-top:4px;">$${Number(b.totalPrice || 0).toFixed(2)}</div></div></div>`).join('') + el.innerHTML;
   } catch (e) { console.error(e); }
 }
 
@@ -1303,47 +2005,204 @@ function addApprovedBookings(req) {
     messagesEl.scrollTop = messagesEl.scrollHeight;
 
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          system: 'You are Fides, a helpful corporate travel assistant. Help employees plan trips, find the best flights and hotels, understand travel policies, and answer any travel-related questions. Be concise and practical.',
-          messages: chatHistory
-        })
-      });
-      const data = await res.json();
-      const reply = data.content?.[0]?.text || 'Sorry, I couldn\'t generate a response.';
-      el.innerHTML = reply.replace(/\n/g, '<br>');
-      chatHistory.push({ role: 'assistant', content: reply });
+      if (groqKey || openAiKey) {
+        // ── Groq / OpenAI path (OpenAI-compatible) ───────────────────────────
+        const useGroq = !!groqKey;
+        const apiKey  = groqKey || openAiKey;
+        const baseUrl = useGroq
+          ? 'https://api.groq.com/openai/v1/chat/completions'
+          : 'https://api.openai.com/v1/chat/completions';
+        const model   = useGroq ? 'llama-3.3-70b-versatile' : 'gpt-4o-mini';
+
+        const messages = [
+          { role: 'system', content: 'You are Fides, a helpful corporate travel assistant. Help employees plan trips, find the best flights and hotels, understand travel policies, and answer any travel-related questions. Be concise and practical.' },
+          ...chatHistory.map(e => ({ role: e.role === 'assistant' ? 'assistant' : 'user', content: e.content }))
+        ];
+        const res = await fetch(baseUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+          body: JSON.stringify({ model, messages, max_tokens: 1000, temperature: 0.6 })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error?.message || 'AI request failed.');
+        const reply = data.choices?.[0]?.message?.content || 'Sorry, I couldn\'t generate a response.';
+        el.innerHTML = reply.replace(/\n/g, '<br>');
+        chatHistory.push({ role: 'assistant', content: reply });
+      } else {
+        // ── Gemini / Vertex AI path ──────────────────────────────────────────
+        const activeKey = vertexAiKey || geminiApiKey;
+        if (!activeKey) throw new Error('No AI API key configured. Add OPENAI_API_KEY, VERTEX_AI_API_KEY, or GEMINI_API_KEY to your .env file.');
+
+        const contents = chatHistory.map(entry => ({
+          role: entry.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: entry.content }]
+        }));
+
+        const modelCandidates = ['gemini-2.0-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-pro-latest'];
+        const buildUrl = (m) => `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(activeKey)}`;
+
+        let data = null, lastErr = null;
+        for (const modelName of modelCandidates) {
+          const res = await fetch(buildUrl(modelName), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              system_instruction: { parts: [{ text: 'You are Fides, a helpful corporate travel assistant. Help employees plan trips, find the best flights and hotels, understand travel policies, and answer any travel-related questions. Be concise and practical.' }] },
+              contents,
+              generationConfig: { maxOutputTokens: 1000, temperature: 0.6 }
+            })
+          });
+          if (res.ok) { data = await res.json(); break; }
+          const errData = await res.json().catch(() => ({}));
+          const msg = errData.error?.message || 'AI request failed.';
+          lastErr = new Error(msg);
+          if (!/not found|not supported/i.test(msg)) break;
+        }
+        if (!data) throw lastErr || new Error('AI request failed.');
+        const reply = (data.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('') || 'Sorry, I couldn\'t generate a response.';
+        el.innerHTML = reply.replace(/\n/g, '<br>');
+        chatHistory.push({ role: 'assistant', content: reply });
+      }
     } catch (err) {
-      el.innerHTML = 'Error reaching the AI. Please try again.';
+      el.innerHTML = `Error reaching the AI: ${err.message || 'Please try again.'}`;
       chatHistory.pop(); // remove failed user message
     }
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
 
-  // ── Feedback ─────────────────────────────────────────────────────────────────
+  // ── Expense tracker ───────────────────────────────────────────────────────────
+  const EXP_KEY = 'fides_expenses';
+  function loadExpenses() {
+    try { return JSON.parse(localStorage.getItem(EXP_KEY) || '[]'); } catch { return []; }
+  }
+  function saveExpenses(exps) {
+    try { localStorage.setItem(EXP_KEY, JSON.stringify(exps)); } catch {}
+  }
+
+  const catEmoji = { meals:'🍽️', transport:'🚗', parking:'🅿️', lodging:'🏨', baggage:'🧳', supplies:'📦', other:'📋' };
+  const catLabel = { meals:'Meals & dining', transport:'Ground transport', parking:'Parking & tolls', lodging:'Lodging', baggage:'Baggage fees', supplies:'Business supplies', other:'Other' };
+
+  function toggleExpenseForm() {
+    const wrap = document.getElementById('expense-form-wrap');
+    const showing = wrap.style.display !== 'none';
+    wrap.style.display = showing ? 'none' : 'block';
+    if (!showing) {
+      document.getElementById('exp-date').value = new Date().toISOString().slice(0,10);
+      document.getElementById('exp-desc').focus();
+    }
+  }
+
+  function addExpense() {
+    const desc = document.getElementById('exp-desc').value.trim();
+    const amount = parseFloat(document.getElementById('exp-amount').value);
+    const date = document.getElementById('exp-date').value;
+    const category = document.getElementById('exp-category').value;
+    const notes = document.getElementById('exp-notes').value.trim();
+    if (!desc) return alert('Please enter a description.');
+    if (isNaN(amount) || amount < 0) return alert('Please enter a valid amount.');
+    if (!date) return alert('Please select a date.');
+    const expenses = loadExpenses();
+    expenses.unshift({ id: Date.now(), desc, amount, date, category, notes, status: 'pending' });
+    saveExpenses(expenses);
+    renderExpenses();
+    // reset form
+    document.getElementById('exp-desc').value = '';
+    document.getElementById('exp-amount').value = '';
+    document.getElementById('exp-notes').value = '';
+    document.getElementById('expense-form-wrap').style.display = 'none';
+  }
+
+  function deleteExpense(id) {
+    const expenses = loadExpenses().filter(e => e.id !== id);
+    saveExpenses(expenses);
+    renderExpenses();
+  }
+
+  function renderExpenses() {
+    const expenses = loadExpenses();
+    const listEl = document.getElementById('expense-list');
+    const emptyEl = document.getElementById('expense-empty');
+    const totalsEl = document.getElementById('expense-totals');
+
+    if (!expenses.length) {
+      listEl.innerHTML = '';
+      listEl.appendChild(emptyEl || document.createElement('div'));
+      if (emptyEl) emptyEl.style.display = '';
+      totalsEl.style.display = 'none';
+      return;
+    }
+
+    const total = expenses.reduce((s, e) => s + (e.amount || 0), 0);
+    listEl.innerHTML = expenses.map(e => `
+      <div style="display:flex;align-items:center;gap:0.85rem;padding:0.85rem 1rem;border:1px solid var(--border);border-radius:10px;background:var(--surface);margin-bottom:0.6rem;">
+        <div style="font-size:1.4rem;flex-shrink:0;">${catEmoji[e.category] || '📋'}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:500;font-size:0.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${e.desc}</div>
+          <div style="font-size:0.73rem;color:var(--muted);">${catLabel[e.category] || 'Other'} · ${e.date}${e.notes ? ' · ' + e.notes : ''}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.35rem;flex-shrink:0;">
+          <div style="font-size:0.95rem;font-weight:600;">$${e.amount.toFixed(2)}</div>
+          <span class="badge badge-warning" style="font-size:0.65rem;">Pending reimbursement</span>
+        </div>
+        <button onclick="deleteExpense(${e.id})" title="Remove" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.1rem;padding:0.1rem 0.3rem;border-radius:4px;transition:color 0.1s,background 0.1s;flex-shrink:0;" onmouseover="this.style.color='var(--error)';this.style.background='#fdf0ef'" onmouseout="this.style.color='var(--muted)';this.style.background='none'">×</button>
+      </div>`).join('');
+    totalsEl.style.display = 'flex';
+    document.getElementById('expense-total-amount').textContent = '$' + total.toFixed(2);
+  }
+
+  // ── Travel guidelines toggle ──────────────────────────────────────────────────
+  function toggleGuidelines() {
+    const panel = document.getElementById('guidelines-panel');
+    const showing = panel.style.display !== 'none';
+    panel.style.display = showing ? 'none' : 'block';
+  }
+
+  // ── Modals ────────────────────────────────────────────────────────────────────
+  function openModal(id) {
+    const el = document.getElementById(id);
+    el.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
+    document.body.style.overflow = '';
+  }
+  function closeModalBg(e, id) {
+    if (e.target === document.getElementById(id)) closeModal(id);
+  }
+
+  // Feedback ─────────────────────────────────────────────────────────────────
   async function sendFeedback() {
   const val = document.getElementById('feedback-input').value.trim();
   if (!val) return;
   try {
-    await fetch(`${API}/feedback`, {
+    const res = await fetch(`${API}/feedback`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
       body: JSON.stringify({ feedback: val })
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || 'Could not send feedback.');
+    }
     document.getElementById('feedback-input').value = '';
     alert('Thanks for your feedback!');
-  } catch(e) { alert('Could not send feedback.'); }
+  } catch(e) { alert(e.message || 'Could not send feedback.'); }
 }
 
   // ── Init ──────────────────────────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', async () => {
     await loadUser();
     await loadBookings();
+    renderExpenses();
+    renderAccountReimbursements();
     loadMapsApi().then(() => { if (typeof google !== 'undefined') initAutocomplete(); });
+    const meals = document.getElementById('chk-meals');
+    if (meals) meals.addEventListener('change', refreshApprovalPanel);
+    const depart = document.getElementById('depart-date');
+    const ret = document.getElementById('return-date');
+    if (depart) depart.addEventListener('change', refreshApprovalPanel);
+    if (ret) ret.addEventListener('change', refreshApprovalPanel);
   });
 
   // Live-sync across tabs: when localStorage changes (another tab submitted/decided),
@@ -1355,6 +2214,8 @@ function addApprovedBookings(req) {
       renderManagerRequests();
     } else {
       renderEmployeeRequests();
+      renderPreviousTrips();
+      loadBookings();
     }
   });
 </script>

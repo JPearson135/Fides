@@ -177,7 +177,7 @@
   </div>
 
   <script>
-    const API = 'http://localhost:3000/api/auth';
+    const API = '/api/auth';
     let selectedRole = 'employee';
     let allManagers = [];
     let selectedManagerId = null;
@@ -201,7 +201,7 @@
 
     async function loadManagers() {
       try {
-        const res = await fetch('http://localhost:3000/api/auth/managers-public');
+        const res = await fetch(`${API}/managers-public`);
         const data = await res.json();
         allManagers = data.managers || [];
         renderManagers(allManagers);

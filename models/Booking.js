@@ -29,7 +29,8 @@ const bookingSchema = new mongoose.Schema({
   totalPrice: Number,
   currency: String,
   bookingDate: { type: Date, default: Date.now },
-  notes: String
+  notes: String,
+  reimbursementStatus: { type: String, enum: ['pending', 'paid', 'denied'], default: 'pending' }
 });
 
 module.exports = mongoose.model('Booking', bookingSchema);

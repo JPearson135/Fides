@@ -110,5 +110,81 @@ router.get('/managers', authMiddleware, async (req, res) => {
   }
 });
 
+// Delete own account and all associated data
+router.delete('/me', authMiddleware, async (req, res) => {
+  try {
+    const Booking = require('../models/Booking');
+    const TravelRequest = require('../models/TravelRequest');
+    await Booking.deleteMany({ userId: req.userId });
+    await TravelRequest.deleteMany({ employeeId: req.userId });
+    await User.findByIdAndDelete(req.userId);
+    res.json({ message: 'Account and all associated data deleted.' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// HR: get all users (employees + managers)
+router.get('/hr/users', authMiddleware, async (req, res) => {
+  try {
+    const requester = await User.findById(req.userId).select('role email');
+    if (!requester || requester.role !== 'hr') {
+      return res.status(403).json({ error: 'HR access only.' });
+    }
+    const users = await User.find({ role: { $in: ['employee', 'manager'] } })
+      .select('_id email displayName role managerId createdAt')
+      .populate('managerId', 'email displayName');
+    res.json({ users });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// HR: get all bookings across all users
+router.get('/hr/bookings', authMiddleware, async (req, res) => {
+  try {
+    const requester = await User.findById(req.userId).select('role');
+    if (!requester || requester.role !== 'hr') {
+      return res.status(403).json({ error: 'HR access only.' });
+    }
+    const Booking = require('../models/Booking');
+    const bookings = await Booking.find({})
+      .sort({ bookingDate: -1 })
+      .populate('userId', 'email displayName role');
+    res.json({ bookings });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// HR: get all travel requests (approvals) across all users
+router.get('/hr/requests', authMiddleware, async (req, res) => {
+  try {
+    const requester = await User.findById(req.userId).select('role');
+    if (!requester || requester.role !== 'hr') {
+      return res.status(403).json({ error: 'HR access only.' });
+    }
+    const TravelRequest = require('../models/TravelRequest');
+    const requests = await TravelRequest.find({})
+      .sort({ submittedAt: -1 })
+      .populate('employeeId', 'email displayName')
+      .populate('managerId',  'email displayName');
+    res.json({ requests });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+router.post('/seed-hr', async (req, res) => {
+  try {
+    const existing = await User.findOne({ email: 'hr@fides.com' });
+    if (existing) return res.json({ message: 'HR user already exists.' });
+    const hashed = await bcrypt.hash('adminpw', 10);
+    await User.create({ email: 'hr@fides.com', password: hashed, role: 'hr', displayName: 'HR Admin' });
+    res.json({ message: 'HR superuser created.' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
 module.exports.authMiddleware = authMiddleware;
