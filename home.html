@@ -338,14 +338,6 @@
       <div class="empty-state" style="border:1px solid var(--border);border-radius:12px;margin-bottom:1.25rem;"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg><div class="empty-state-title">No upcoming bookings</div><div class="empty-state-sub">Your confirmed trips will appear here</div></div>
     </div>
 
-    <!-- Reimbursed trips section -->
-    <div style="margin-top:2rem;">
-      <div class="card-title">Reimbursed trips</div>
-      <div id="reimbursed-trips-list" style="margin-bottom:1.25rem;">
-        <div class="empty-state" style="border:1px solid var(--border);border-radius:12px;"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg><div class="empty-state-title">No reimbursed trips</div><div class="empty-state-sub">Completed trips marked as reimbursed will appear here</div></div>
-      </div>
-    </div>
-
     <!-- Reimbursable Expenses -->
     <div style="margin-top:1.75rem;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
@@ -818,15 +810,13 @@
     });
 
     try {
-      const [bookingsRes, requestsRes, reimbursedRes] = await Promise.all([
+      const [bookingsRes, requestsRes] = await Promise.all([
         fetch(`${API}/auth/hr/bookings`, { headers: { Authorization: `Bearer ${token()}` } }),
-        fetch(`${API}/auth/hr/requests`,  { headers: { Authorization: `Bearer ${token()}` } }),
-        fetch(`${API}/requests/reimbursed/list`,  { headers: { Authorization: `Bearer ${token()}` } })
+        fetch(`${API}/auth/hr/requests`,  { headers: { Authorization: `Bearer ${token()}` } })
       ]);
 
       const { bookings }  = bookingsRes.ok  ? await bookingsRes.json()  : { bookings: [] };
       const { requests }  = requestsRes.ok  ? await requestsRes.json()  : { requests: [] };
-      const reimbursedData = reimbursedRes.ok ? await reimbursedRes.json() : { reimbursedRequests: {} };
 
       const now = new Date();
 
@@ -844,19 +834,16 @@
       // ── Pending approvals from DB ──
       const pendingApprovals = requests.filter(r => r.status === 'pending');
 
-      // ── Approved trips (not yet reimbursed) - count for stats ──
-      const approvedTrips = requests.filter(r => r.status === 'approved' && !r.reimbursed);
-      
       // ── All bookings as reimbursements (employees + managers) ──
+      // /hr/bookings already returns all users; we just need to also pull manager
+      // bookings which are included since the endpoint queries Booking globally.
       const reimbursements = bookings.filter(b => b.totalPrice > 0);
-      
-      // ── Reimbursed travel requests organized by person ──
-      const reimbursedRequests = reimbursedData.reimbursedRequests?.organized || {};
+      const pendingReimbCount = reimbursements.filter(b => (b.reimbursementStatus || 'pending') === 'pending').length;
 
       // Stats
       document.getElementById('hr-stat-trips').textContent = upcomingTrips.length;
       document.getElementById('hr-stat-approvals').textContent = pendingApprovals.length;
-      document.getElementById('hr-stat-reimbursements').textContent = approvedTrips.length;
+      document.getElementById('hr-stat-reimbursements').textContent = pendingReimbCount;
 
       // ── Render upcoming trips ──
       const tripsEl = document.getElementById('hr-trips-list');
@@ -907,58 +894,49 @@
         }).join('');
       }
 
-      // ── Render reimbursements (organized by employee/manager) ──
+      // ── Render reimbursements ──
       const reimbEl = document.getElementById('hr-reimbursements-list');
-      let reimbHtml = '';
-      
-      // Add approved trips that need to be reimbursed
-      if (approvedTrips.length) {
-        reimbHtml += `<div style="margin-bottom:1.5rem;">
-          <div style="font-size:0.82rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:0.75rem;">Mark as Reimbursed</div>
-          ${approvedTrips.map(r => {
-            const emp = r.employeeId;
-            const empName = emp?.displayName || emp?.email || 'Unknown';
-            const roleLabel = r.managerId ? '🏢 Manager' : '👤 Employee';
-            return `<div class="ticket-card" id="trip-${r._id}" style="flex-direction:column;align-items:stretch;gap:0;margin-bottom:0.75rem;">
-              <div style="display:flex;align-items:center;gap:0.85rem;">
-                <div class="ticket-icon">🎫</div>
-                <div style="flex:1;min-width:0;">
-                  <div class="ticket-route">${r.tripName}</div>
-                  <div class="ticket-meta">${empName} <span style="opacity:0.6;">(${roleLabel})</span> · ${r.dates} · ${r.totalCost}</div>
-                </div>
-                <span class="badge badge-success">Approved</span>
-              </div>
-              <div style="margin-top:0.6rem;display:flex;gap:0.4rem;">
-                <button class="btn btn-primary btn-sm" style="flex:1;font-size:0.75rem;padding:0.4rem 0.6rem;" onclick="hrMarkReimbursed('${r._id}')">✓ Mark Reimbursed</button>
-              </div>
-            </div>`;
-          }).join('')}
-        </div>`;
-      }
-      
-      // Add reimbursed trips organized by person
-      if (Object.keys(reimbursedRequests).length > 0) {
-        reimbHtml += `<div>
-          <div style="font-size:0.82rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:0.75rem;">Reimbursed Trips</div>
-          ${Object.entries(reimbursedRequests).map(([personName, trips]) => {
-            return `<div style="margin-bottom:1rem;">
-              <div style="font-size:0.8rem;font-weight:500;color:var(--text);padding:0.5rem 0;border-bottom:1px solid var(--border);margin-bottom:0.5rem;">${personName}</div>
-              ${trips.map(trip => {
-                const reimbDate = trip.reimbursedDate ? new Date(trip.reimbursedDate).toLocaleDateString([], { month: 'short', day: 'numeric' }) : '';
-                return `<div style="font-size:0.78rem;padding:0.35rem 0;display:flex;justify-content:space-between;opacity:0.8;">
-                  <span>${trip.tripName}</span>
-                  <span>${reimbDate}</span>
-                </div>`;
-              }).join('')}
-            </div>`;
-          }).join('')}
-        </div>`;
-      }
-      
-      if (!reimbHtml) {
-        reimbEl.innerHTML = '<div class="empty-state" style="padding:1.5rem;"><div class="empty-state-title">No reimbursements pending</div></div>';
+      if (!reimbursements.length) {
+        reimbEl.innerHTML = '<div class="empty-state" style="padding:1.5rem;"><div class="empty-state-title">No reimbursements on record</div></div>';
       } else {
-        reimbEl.innerHTML = reimbHtml;
+        // Sort: pending first, then by booking date desc
+        const sortedReimb = [...reimbursements].sort((a, b) => {
+          const aP = (a.reimbursementStatus || 'pending') === 'pending' ? 0 : 1;
+          const bP = (b.reimbursementStatus || 'pending') === 'pending' ? 0 : 1;
+          if (aP !== bP) return aP - bP;
+          return new Date(b.bookingDate) - new Date(a.bookingDate);
+        });
+        reimbEl.innerHTML = sortedReimb.map(b => {
+          const user = b.userId;
+          const name = user?.displayName || user?.email || 'Unknown';
+          const roleLabel = user?.role === 'manager' ? '🏢 Manager' : '👤 Employee';
+          const typeIcon = b.type === 'flight' ? '✈️' : b.type === 'hotel' ? '🏨' : '🚗';
+          const bookedOn = new Date(b.bookingDate).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+          const typeLabel = b.type.charAt(0).toUpperCase() + b.type.slice(1);
+          const rs = b.reimbursementStatus || 'pending';
+          const badgeCls = rs === 'paid' ? 'badge-success' : rs === 'denied' ? 'badge-error' : 'badge-warning';
+          const badgeLabel = rs === 'paid' ? '✓ Paid' : rs === 'denied' ? '✗ Denied' : 'Pending';
+          const actionBtns = rs === 'pending'
+            ? `<div style="display:flex;gap:0.4rem;margin-top:0.5rem;">
+                <button class="btn-approve" style="flex:1;padding:0.35rem 0.5rem;font-size:0.75rem;" onclick="hrSetReimbursement('${b._id}','paid')">✓ Mark paid</button>
+                <button class="btn-deny"    style="flex:1;padding:0.35rem 0.5rem;font-size:0.75rem;" onclick="hrSetReimbursement('${b._id}','denied')">✗ Deny</button>
+               </div>`
+            : `<button class="btn btn-sm" style="margin-top:0.5rem;font-size:0.72rem;color:var(--muted);" onclick="hrSetReimbursement('${b._id}','pending')">↩ Reset to pending</button>`;
+          return `<div class="ticket-card" id="reimb-${b._id}" style="flex-direction:column;align-items:stretch;gap:0;${rs==='paid'?'opacity:0.65;':''}">
+            <div style="display:flex;align-items:center;gap:0.85rem;">
+              <div class="ticket-icon">${typeIcon}</div>
+              <div style="flex:1;min-width:0;">
+                <div class="ticket-route">${typeLabel}${b.notes ? ' — ' + b.notes : ''}</div>
+                <div class="ticket-meta">${name} <span style="opacity:0.6;">(${roleLabel})</span> · Booked ${bookedOn}</div>
+              </div>
+              <div class="ticket-right">
+                <div style="font-size:0.95rem;font-weight:600;">$${(b.totalPrice || 0).toFixed(2)}</div>
+                <span class="badge ${badgeCls}" id="reimb-badge-${b._id}">${badgeLabel}</span>
+              </div>
+            </div>
+            <div id="reimb-actions-${b._id}">${actionBtns}</div>
+          </div>`;
+        }).join('');
       }
     } catch (e) {
       console.error('HR dashboard error:', e);
@@ -966,24 +944,6 @@
         const el = document.getElementById(id);
         if (el) el.innerHTML = '<div class="empty-state" style="padding:1.5rem;"><div class="empty-state-title" style="color:var(--error);">Could not load data</div></div>';
       });
-    }
-  }
-
-  async function hrMarkReimbursed(tripId) {
-    try {
-      const res = await fetch(`${API}/requests/${tripId}/reimburse`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
-        body: JSON.stringify({})
-      });
-      if (!res.ok) {
-        const d = await res.json().catch(() => ({}));
-        return alert(d.error || 'Could not mark trip as reimbursed.');
-      }
-      // Reload the HR dashboard to show updated data
-      loadHRDashboard();
-    } catch (e) {
-      alert('Could not reach the server.');
     }
   }
 
@@ -1141,7 +1101,6 @@
       // Seed submitted requests list for employees
       if (user.role !== 'manager') renderEmployeeRequests();
       renderPreviousTrips();
-      renderReimbursedTrips();
     } catch (e) { console.error(e); }
   }
 
@@ -1939,7 +1898,6 @@
     renderManagerRequests();
     renderEmployeeRequests();
     renderPreviousTrips();
-    renderReimbursedTrips();
   }
 
   async function renderPreviousTrips() {
@@ -1972,47 +1930,6 @@
       </div>
       <div style="font-size:0.75rem;color:var(--muted);margin-top:2px;">${r.dates} · ${r.totalCost}</div>
     </div>`).join('');
-  }
-
-  async function renderReimbursedTrips() {
-    const el = document.getElementById('reimbursed-trips-list');
-    if (!el) return;
-
-    let reimbursed = [];
-    try {
-      const res = await fetch(`${API}/requests/reimbursed/list`, { headers: { Authorization: `Bearer ${token()}` } });
-      if (res.ok) {
-        const data = await res.json();
-        reimbursed = data.reimbursedRequests || [];
-      } else { throw new Error(); }
-    } catch (e) {
-      console.error('Could not load reimbursed trips:', e);
-      el.innerHTML = `<div class="empty-state" style="border:1px solid var(--border);border-radius:12px;"><div class="empty-state-title">Could not load reimbursed trips</div></div>`;
-      return;
-    }
-
-    if (!reimbursed.length) {
-      el.innerHTML = `<div class="empty-state" style="border:1px solid var(--border);border-radius:12px;"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg><div class="empty-state-title">No reimbursed trips</div><div class="empty-state-sub">Completed trips marked as reimbursed will appear here</div></div>`;
-      return;
-    }
-
-    el.innerHTML = reimbursed.map(r => {
-      const badgeCls = 'badge-success';
-      const badgeLabel = '✓ Reimbursed';
-      const reimbursedDate = r.reimbursedDate ? new Date(r.reimbursedDate).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) : '';
-      return `<div class="approval-row" style="flex-direction:column;align-items:flex-start;gap:0.4rem;">
-        <div style="display:flex;justify-content:space-between;width:100%;align-items:flex-start;">
-          <div>
-            <div class="approval-title">${r.tripName}</div>
-            <div class="approval-meta">${r.dates} · ${r.totalCost}${reimbursedDate ? ' · Reimbursed ' + reimbursedDate : ''}</div>
-          </div>
-          <span class="badge ${badgeCls}">${badgeLabel}</span>
-        </div>
-        <div style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:7px;overflow:hidden;">
-          ${(r.items||[]).map(it => `<div style="display:flex;justify-content:space-between;padding:0.3rem 0.7rem;font-size:0.8rem;border-bottom:1px solid var(--border);"><span>${it.icon} ${it.label}</span><span>${it.price}</span></div>`).join('')}
-        </div>
-      </div>`;
-    }).join('');
   }
 
   // ── Create bookings in Travel tab after approval ─────────────────────────────
